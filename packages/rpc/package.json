@@ -1,0 +1,9 @@
+{
+  "name": "@polypop/rpc",
+  "version": "0.1.0",
+  "private": true,
+  "main": "index.js",
+  "types": "index.d.ts",
+  "files": ["index.js", "index.d.ts", "config.js"],
+  "peerDependencies": { "viem": "^2.34.0" }
+}

@@ -1,0 +1,82 @@
+[
+  {
+    "id": "france-champion-2026",
+    "team": "France",
+    "flag": "🇫🇷",
+    "addresses": {
+      "base-sepolia": "0x8a25E1998e8482f5Fc59CC1ac1307ab7B96EDCA6",
+      "arc-testnet": "0xf3E37DF749Dafee17fB9556AEB2aa236998c54A6",
+      "bsc-testnet": "0xEE74fb96Bc55a693E0A432f4991b85FDAA85f177"
+    }
+  },
+  {
+    "id": "morocco-champion-2026",
+    "team": "Morocco",
+    "flag": "🇲🇦",
+    "addresses": {
+      "base-sepolia": "0xcD387D85c64Cb0f240a86b2Bd1b2fE1512eb6918",
+      "arc-testnet": "0xB1861b6c28c60C3E26ad467b2C6F2d8a8581bC7c",
+      "bsc-testnet": "0x2cC038bb25044c1DAD7837E16bd68da8ae66907C"
+    }
+  },
+  {
+    "id": "spain-champion-2026",
+    "team": "Spain",
+    "flag": "🇪🇸",
+    "addresses": {
+      "base-sepolia": "0x3E2e0a5Ef0A7DE4737728Bc68A85f3B19fd9039F",
+      "arc-testnet": "0x3E850A4E97fa07Af520fceCd3EeE32a35653FbE6",
+      "bsc-testnet": "0x20E4ddAE55cF66965497c75c69Dd8640eC13662F"
+    }
+  },
+  {
+    "id": "belgium-champion-2026",
+    "team": "Belgium",
+    "flag": "🇧🇪",
+    "addresses": {
+      "base-sepolia": "0x745AFF87044FaC70eFe3339dE1ee21b4C156e83a",
+      "arc-testnet": "0x33Ed2909E5348C8d3b99aF34468E7F2FdA65Dabf",
+      "bsc-testnet": "0x400fe73d28d1a9D599534a2Ca4F5E57Aed3B4766"
+    }
+  },
+  {
+    "id": "norway-champion-2026",
+    "team": "Norway",
+    "flag": "🇳🇴",
+    "addresses": {
+      "base-sepolia": "0x71e4246085c2b970Ca4394d155D319C558181Ef4",
+      "arc-testnet": "0x82fc0b6D7fBe311DADc33679cF44a48c426c75a7",
+      "bsc-testnet": "0x06b6cee271f34590610Ae25c6cAb0F59B691f3A7"
+    }
+  },
+  {
+    "id": "england-champion-2026",
+    "team": "England",
+    "flag": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+    "addresses": {
+      "base-sepolia": "0xDde95537bEE2d4A91b49FD13890A2D79a831Fcf6",
+      "arc-testnet": "0xF930DEB8Cf5157777F42558D6e5AE92D822E93dB",
+      "bsc-testnet": "0x66fA699546401806ABFb44FFF8FB78576915eA0A"
+    }
+  },
+  {
+    "id": "argentina-champion-2026",
+    "team": "Argentina",
+    "flag": "🇦🇷",
+    "addresses": {
+      "base-sepolia": "0xE8516Aa08B73A79c55a606181A333fBA70Da3025",
+      "arc-testnet": "0xebafd4FE822021AE42BbEE06E45846c3702069e7",
+      "bsc-testnet": "0xcFf02a3cfcE2375f69f4c13d4020DFaBF0b1a713"
+    }
+  },
+  {
+    "id": "switzerland-champion-2026",
+    "team": "Switzerland",
+    "flag": "🇨🇭",
+    "addresses": {
+      "base-sepolia": "0xE40D99EAd9c59c1Ac5Eb7794859b1F23e56aa8A6",
+      "arc-testnet": "0x9e7F12A60c33446E547b139F8A413F1D81B86C42",
+      "bsc-testnet": "0x970e78a3A188DC5Cf468C6249c3f273eFB462Bc1"
+    }
+  }
+]

@@ -1,0 +1,633 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  tgId          BigInt   @id
+  walletAddress String?  @db.VarChar(42)
+  username      String?  @db.VarChar(255)
+  createdAt     DateTime @default(now())
+
+  betsCreated Bet[]      @relation("creator")
+  positions   Position[]
+
+  @@map("users")
+}
+
+enum BetStatus {
+  PROPOSED
+  OPEN
+  LOCKED
+  SETTLED
+  CANCELLED
+  EXPIRED
+}
+
+model Bet {
+  id              Int       @id @default(autoincrement())
+  uuid            String    @unique @default(uuid())
+  chainId         Int       @default(84532)
+  betId           Int?
+  contractAddress String?   @db.VarChar(42)
+  creatorTgId     BigInt
+  asset           String    @db.VarChar(20)
+  minAmount       Decimal
+  maxAmount       Decimal
+  duration        Int
+  bettingDeadline DateTime?
+  status          BetStatus @default(PROPOSED)
+  messageId       BigInt?
+  chatId          BigInt
+  createdAt       DateTime  @default(now())
+  startTime       DateTime?
+  endTime         DateTime?
+  startPrice      String?   @db.VarChar(40)
+  endPrice        String?   @db.VarChar(40)
+  winningSide     String?   @db.VarChar(4)
+  isDraw          Boolean   @default(false)
+  totalUp         Decimal   @default(0)
+  totalDown       Decimal   @default(0)
+  txHash          String?   @db.VarChar(66)
+
+  creator   User       @relation("creator", fields: [creatorTgId], references: [tgId])
+  positions Position[]
+
+  @@unique([chainId, betId])
+  @@unique([chainId, contractAddress])
+  @@index([chainId, status])
+  @@map("bets")
+}
+
+model Position {
+  id      Int     @id @default(autoincrement())
+  betId   Int
+  tgId    BigInt
+  chainId Int     @default(84532)
+  side    String  @db.VarChar(4) // "UP" or "DOWN"
+  amount  Decimal
+  claimed Boolean @default(false)
+
+  bet  Bet  @relation(fields: [betId], references: [id])
+  user User @relation(fields: [tgId], references: [tgId])
+
+  @@unique([betId, tgId])
+  @@index([chainId])
+  @@map("positions")
+}
+
+enum ProposalStatus {
+  PROPOSED
+  OPEN
+  LOCKED
+  SETTLED
+  CANCELLED
+}
+
+enum ProposalType {
+  PRICE_BET
+  EVENT_BET
+}
+
+model XUser {
+  id            Int         @id @default(autoincrement())
+  xUserId       String      @unique @db.VarChar(64)
+  username      String?     @db.VarChar(255)
+  walletAddress String?     @unique @db.VarChar(42)
+  createdAt     DateTime    @default(now())
+  proposals     XProposal[]
+
+  @@map("x_users")
+}
+
+model XProposal {
+  id                   Int            @id @default(autoincrement())
+  uuid                 String         @unique @default(uuid())
+  chainId              Int            @default(84532)
+  tweetId              String         @unique @db.VarChar(64)
+  conversationId       String?        @db.VarChar(64)
+  creatorXUserId       String         @db.VarChar(64)
+  creatorUsername       String?        @db.VarChar(255)
+  creatorWallet        String?        @db.VarChar(42)
+  asset                String         @db.VarChar(20)
+  minAmount            Decimal
+  maxAmount            Decimal
+  duration             Int
+  status               ProposalStatus @default(PROPOSED)
+  proposalReplyTweetId String?        @db.VarChar(64)
+  announcementTweetId  String?        @db.VarChar(64)
+  settlementTweetId    String?        @db.VarChar(64)
+  contractAddress      String?        @db.VarChar(42)
+  onChainBetId         Int?
+  txHash               String?        @db.VarChar(66)
+  bettingDeadline      DateTime?
+  startTime            DateTime?
+  endTime              DateTime?
+  startPrice           String?        @db.VarChar(40)
+  endPrice             String?        @db.VarChar(40)
+  winningSide          String?        @db.VarChar(8)
+  isDraw               Boolean        @default(false)
+  totalUp              Decimal        @default(0)
+  totalDown            Decimal        @default(0)
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
+  // Event bet fields
+  type             ProposalType @default(PRICE_BET)
+  question         String?      @db.Text
+  dataSourceType   String?      @db.VarChar(20)
+  dataSourceConfig String?      @db.Text
+  outcome          String?      @db.VarChar(10)
+  totalYes         Decimal      @default(0)
+  totalNo          Decimal      @default(0)
+
+  creator XUser @relation(fields: [creatorXUserId], references: [xUserId])
+
+  @@unique([chainId, contractAddress])
+  @@unique([chainId, onChainBetId])
+  @@index([status])
+  @@index([chainId, status])
+  @@index([type, status])
+  @@map("x_proposals")
+}
+
+model Cursor {
+  key       String   @id @db.VarChar(100)
+  value     String   @db.VarChar(255)
+  updatedAt DateTime @updatedAt
+
+  @@map("x_cursors")
+}
+
+model OracleRegistry {
+  chainId       Int      @default(84532)
+  asset         String   @db.VarChar(50)
+  oracleAddress String   @db.VarChar(42)
+  decimals      Int
+  description   String   @db.VarChar(255)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@id([chainId, asset])
+  @@unique([chainId, oracleAddress])
+  @@map("oracle_registry")
+}
+
+model WorkerLease {
+  key       String   @id @db.VarChar(100)
+  owner     String   @db.VarChar(100)
+  expiresAt DateTime
+  updatedAt DateTime @updatedAt
+
+  @@map("worker_leases")
+}
+
+enum VerificationKind {
+  BET
+  PRICE_ORACLE
+  EVENT_BET
+}
+
+enum VerificationStatus {
+  PENDING
+  VERIFYING
+  VERIFIED
+  FAILED
+}
+
+model ContractVerification {
+  contractAddress String             @id @db.VarChar(42)
+  chainId         Int                @default(84532)
+  kind            VerificationKind
+  status          VerificationStatus @default(PENDING)
+  verifyAttempts  Int                @default(0)
+  txHash          String?            @db.VarChar(66)
+  lastError       String?            @db.Text
+  verifiedAt      DateTime?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@index([status, kind])
+  @@index([chainId])
+  @@map("contract_verifications")
+}
+
+// --- Batch Oracle Job Tracking ---
+
+enum BatchOracleStep {
+  PENDING
+  ORACLE_CREATED
+  REPORTER_SET
+  FEED_SET
+  DONE
+  FAILED
+}
+
+model BatchOracleJob {
+  chainId   Int
+  asset     String           @db.VarChar(50)
+  step      BatchOracleStep  @default(PENDING)
+  attempts  Int              @default(0)
+  lastError String?          @db.Text
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@id([chainId, asset])
+  @@index([chainId, step])
+  @@map("batch_oracle_jobs")
+}
+
+// --- SIWE Authentication ---
+
+model SiweNonce {
+  nonce     String   @id @db.VarChar(64)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("siwe_nonces")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  address   String   @db.VarChar(42)
+  chainId   Int
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([address, chainId])
+  @@map("sessions")
+}
+
+// --- Referral / Invite Tracking ---
+
+model ReferralAccount {
+  address   String   @id @db.VarChar(42)
+  code      String   @unique @db.VarChar(24)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  referredConnections ReferralConnection[] @relation("ReferralReferrer")
+  ownConnection       ReferralConnection?  @relation("ReferralReferred")
+  referralTrades      ReferralTrade[]      @relation("ReferralTradeReferrer")
+  trades              ReferralTrade[]      @relation("ReferralTradeTrader")
+
+  @@map("referral_accounts")
+}
+
+model ReferralConnection {
+  referredAddress String    @id @db.VarChar(42)
+  referrerAddress String    @db.VarChar(42)
+  referralCode    String    @db.VarChar(24)
+  source          String?   @db.VarChar(64)
+  connectedAt     DateTime  @default(now())
+  firstTradeAt    DateTime?
+
+  referrer ReferralAccount @relation("ReferralReferrer", fields: [referrerAddress], references: [address])
+  referred ReferralAccount @relation("ReferralReferred", fields: [referredAddress], references: [address])
+
+  @@index([referrerAddress])
+  @@map("referral_connections")
+}
+
+model ReferralTrade {
+  id              BigInt   @id @default(autoincrement())
+  chainId         Int
+  marketAddress   String   @db.VarChar(42)
+  txHash          String   @db.VarChar(66)
+  traderAddress   String   @db.VarChar(42)
+  referrerAddress String   @db.VarChar(42)
+  side            String   @db.VarChar(3) // YES / NO
+  action          String   @db.VarChar(4) // BUY / SELL
+  volumeUsdc      Decimal  @default(0)
+  feeBps          Int
+  feeUsdc         Decimal  @default(0)
+  rewardRateBps   Int      @default(1000) // 10% of the user's fee
+  rewardUsdc      Decimal  @default(0)
+  blockNumber     BigInt?
+  tradedAt        DateTime @default(now())
+  createdAt       DateTime @default(now())
+
+  referrer ReferralAccount @relation("ReferralTradeReferrer", fields: [referrerAddress], references: [address])
+  trader   ReferralAccount @relation("ReferralTradeTrader", fields: [traderAddress], references: [address])
+
+  @@unique([chainId, marketAddress, txHash])
+  @@index([referrerAddress, tradedAt])
+  @@index([traderAddress, tradedAt])
+  @@map("referral_trades")
+}
+
+// --- Oracle Swarm Telemetry ---
+
+model SwarmNanopay {
+  id               String   @id @db.VarChar(80)
+  ts               DateTime
+  oracleId         String   @db.VarChar(80)
+  oracleEmoji      String   @db.VarChar(8)
+  oracleName       String   @db.VarChar(80)
+  kind             String   @db.VarChar(16)
+  amountUsdc       Decimal
+  txHash           String   @db.VarChar(80)
+  verdict          String?  @db.VarChar(4)
+  confidence       Float?
+  // Circle Gateway batching metadata — null for legacy rows recorded before migration
+  batchId          String?  @db.VarChar(64)
+  transferId       String?  @db.VarChar(80)
+  status           String?  @db.VarChar(16)
+  settlementTxHash String?  @db.VarChar(80)
+  payer            String?  @db.VarChar(64)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([ts(sort: Desc)])
+  @@index([batchId])
+  @@index([status, transferId])
+  @@map("swarm_nanopays")
+}
+
+model SwarmConsensus {
+  id                Int      @id @default(autoincrement())
+  ts                DateTime
+  chainId           Int?
+  betId             Int?
+  contractAddress   String?  @db.VarChar(64)
+  question          String   @db.Text
+  topic             String   @db.Text
+  outcome           String   @db.VarChar(4)
+  spread            Float
+  yesWeight         Float
+  noWeight          Float
+  totalNanopayments Int
+  totalSpentUsdc    Decimal
+  resolutionTxHash  String?  @db.VarChar(80)
+  perOracle         Json
+  createdAt         DateTime @default(now())
+
+  evidence SwarmEvidence[]
+
+  @@index([ts(sort: Desc)])
+  @@index([contractAddress])
+  @@map("swarm_consensus")
+}
+
+model SwarmEvidence {
+  id          Int      @id @default(autoincrement())
+  consensusId Int
+  oracleId    String   @db.VarChar(80)
+  externalId  String   @db.VarChar(120)
+  text        String   @db.Text
+  url         String   @db.Text
+  author      String?  @db.VarChar(120)
+  source      String   @db.VarChar(40)
+  timestamp   String   @db.VarChar(40)
+  txHash      String?  @db.VarChar(80)
+  createdAt   DateTime @default(now())
+
+  consensus SwarmConsensus @relation(fields: [consensusId], references: [id], onDelete: Cascade)
+
+  @@index([consensusId, oracleId])
+  @@map("swarm_evidence")
+}
+
+// --- EventMarket (YES/NO AMM) statistics ---
+//
+// One aggregated row per (chainId, contractAddress), holding a market's current
+// totals. Written from the market's own on-chain cumulative counters —
+// getMarketState() → MarketInfo + Stats — by services/event-market-stats.ts,
+// hourly. Values are written absolute (the chain is the source of truth), so a
+// repeated poll converges instead of double-counting.
+//
+// Rows for deprecated markets predating those counters are frozen at whatever
+// the final log scan recorded and are still served by the API; nothing writes
+// to them any more. Read-only aggregation — never touches funds.
+
+model EventMarketStat {
+  chainId          Int
+  contractAddress  String   @db.VarChar(42)
+  question         String?  @db.Text
+  resolutionSource String?  @db.Text
+  status           Int      @default(0) // 0 Open / 1 Locked / 2 Settled
+  yesWins          Boolean  @default(false)
+  isDraw           Boolean  @default(false)
+  bettingDeadline  DateTime? // from getMarketInfo
+  resolveAfter     DateTime? // from getMarketInfo
+
+  // Live on-chain snapshot (getMarketInfo)
+  yesReserve      Decimal @default(0)
+  noReserve       Decimal @default(0)
+  totalCollateral Decimal @default(0)
+  totalLpShares   Decimal @default(0)
+  yesProbability  Float   @default(0.5)
+
+  // Trade aggregates
+  buyYesCount   Int     @default(0)
+  buyNoCount    Int     @default(0)
+  sellYesCount  Int     @default(0)
+  sellNoCount   Int     @default(0)
+  buyYesVolume  Decimal @default(0) // USDC in
+  buyNoVolume   Decimal @default(0)
+  sellYesVolume Decimal @default(0) // USDC out
+  sellNoVolume  Decimal @default(0)
+  totalVolume   Decimal @default(0) // sum of all buy+sell USDC
+  tradeCount    Int     @default(0)
+  uniqueTraders Int     @default(0)
+
+  // Liquidity aggregates
+  liquidityAddedCount   Int     @default(0)
+  liquidityRemovedCount Int     @default(0)
+  totalLiquidityAdded   Decimal @default(0)
+  totalLiquidityRemoved Decimal @default(0)
+  uniqueLps             Int     @default(0)
+
+  // Exit / settlement aggregates
+  pairRedeemCount  Int     @default(0)
+  pairRedeemVolume Decimal @default(0)
+  redeemCount      Int     @default(0)
+  redeemPayout     Decimal @default(0) // USDC paid to winning token holders
+  lpClaimCount     Int     @default(0)
+  lpClaimPayout    Decimal @default(0)
+  platformFee      Decimal @default(0) // from Resolved event
+  creatorFee       Decimal @default(0)
+
+  lastScannedBlock BigInt   @default(0)
+  scannedAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@id([chainId, contractAddress])
+  @@index([chainId])
+  @@map("event_market_stats")
+}
+
+// FROZEN — legacy participant ledger. It existed so unique trader/LP counts
+// could survive incremental block scanning (a Set can't be recomputed across
+// runs). Markets now count unique participants on-chain, so nothing reads or
+// writes this table; it is kept only so the deprecated markets' data isn't
+// destroyed. Drop it with an explicit migration when that history is expendable.
+model EventMarketParticipant {
+  chainId         Int
+  contractAddress String  @db.VarChar(42)
+  address         String  @db.VarChar(42)
+  isTrader        Boolean @default(false)
+  isLp            Boolean @default(false)
+
+  @@id([chainId, contractAddress, address])
+  @@index([chainId, contractAddress])
+  @@map("event_market_participants")
+}
+
+// One row per (chainId, contractAddress, UTC-day) holding that day's DELTAS
+// (volume traded that day, trades that day, …) — not cumulative totals. The
+// exception is totalCollateral, which is a point-in-time TVL snapshot, and the
+// settlement fees, which are the projection at the time of writing; both are
+// overwritten rather than incremented.
+//
+// Written by pollEventMarketStats (services/event-market-stats.ts), which diffs
+// consecutive hourly readings of the market's on-chain cumulative counters. Its
+// uniqueTraders/uniqueLps therefore mean NEW participants that day, not
+// participants active that day.
+//
+// Rows written earlier by the retired log scanner (deprecated markets, and any
+// day before the switch) keep their original meaning and are left in place.
+model EventMarketDailySnapshot {
+  chainId         Int
+  contractAddress String   @db.VarChar(42)
+  date            DateTime @db.Date // UTC start-of-day
+
+  totalVolume     Decimal @default(0)
+  tradeCount      Int     @default(0)
+  totalCollateral Decimal @default(0)
+  uniqueTraders   Int     @default(0)
+  uniqueLps       Int     @default(0)
+  buyYesVolume    Decimal @default(0)
+  buyNoVolume     Decimal @default(0)
+  sellYesVolume   Decimal @default(0)
+  sellNoVolume    Decimal @default(0)
+  platformFee     Decimal @default(0)
+  creatorFee      Decimal @default(0)
+
+  @@id([chainId, contractAddress, date])
+  @@index([chainId])
+  @@index([date])
+  @@map("event_market_daily_snapshots")
+}
+
+// Raw hourly reading of a market's on-chain cumulative counters (EventMarket
+// getMarketState() → MarketInfo + Stats), one row per (chain, contract, hour).
+//
+// This is the primary record for markets that maintain their own statistics:
+// every value here is exactly what the contract reported, so any period's
+// activity is a subtraction of two rows and nothing has to be re-derived from
+// logs. The daily snapshot table above is itself produced by diffing
+// consecutive rows of this one.
+//
+// Keyed by the UTC hour bucket (not the exact read time) so a second poll
+// within the same hour overwrites rather than appends — the table stays bounded
+// at 24 rows/market/day and the delta maths stays correct either way.
+model EventMarketHourlySnapshot {
+  chainId         Int
+  contractAddress String   @db.VarChar(42)
+  hour            DateTime // UTC start-of-hour bucket
+  capturedAt      DateTime @default(now()) // actual read time
+  blockNumber     BigInt   @default(0) // chain head at read time (0 if unknown)
+
+  // Point-in-time state (getMarketInfo)
+  status          Int     @default(0) // 0 Open / 1 Locked / 2 Settled
+  totalCollateral Decimal @default(0)
+  yesReserve      Decimal @default(0)
+  noReserve       Decimal @default(0)
+  totalLpShares   Decimal @default(0)
+  yesProbability  Float   @default(0.5)
+
+  // Cumulative USDC flows (getStats) — monotonic
+  buyYesVolume     Decimal @default(0)
+  buyNoVolume      Decimal @default(0)
+  sellYesVolume    Decimal @default(0)
+  sellNoVolume     Decimal @default(0)
+  liquidityAdded   Decimal @default(0)
+  liquidityRemoved Decimal @default(0)
+  pairRedeemVolume Decimal @default(0)
+  redeemPayout     Decimal @default(0)
+  lpClaimPayout    Decimal @default(0)
+  platformFee      Decimal @default(0) // actual, 0 until settled
+  creatorFee       Decimal @default(0)
+
+  // Cumulative counts (getStats) — monotonic
+  buyYesCount           Int @default(0)
+  buyNoCount            Int @default(0)
+  sellYesCount          Int @default(0)
+  sellNoCount           Int @default(0)
+  liquidityAddedCount   Int @default(0)
+  liquidityRemovedCount Int @default(0)
+  uniqueTraders         Int @default(0)
+  uniqueLps             Int @default(0)
+  pairRedeemCount       Int @default(0)
+  redeemCount           Int @default(0)
+  lpClaimCount          Int @default(0)
+
+  @@id([chainId, contractAddress, hour])
+  @@index([chainId, contractAddress, hour])
+  @@index([hour])
+  @@map("event_market_hourly_snapshots")
+}
+
+// Time-series of a market's YES probability, sampled periodically (the champion
+// probability worker writes one row per market every ~30 min). Generic per-market
+// history — the champion↔team mapping lives in config (bot/config/champion-markets.ts),
+// not here, so the table is reusable for any EventMarket. Feeds the Explore page's
+// champion odds chart via /api/worldcup/champion-history.
+model MarketProbabilityPoint {
+  id              BigInt   @id @default(autoincrement())
+  chainId         Int
+  contractAddress String   @db.VarChar(42)
+  yesProbability  Float // percent, 0..100
+  capturedAt      DateTime @default(now())
+
+  @@index([chainId, contractAddress, capturedAt])
+  @@map("market_probability_points")
+}
+
+// Time-series of a market's YES probability read from OUR OWN on-chain pools
+// (the EventMarket contract's yesProbability()), sampled periodically by the
+// champion-pool-probability worker (one row per market every ~30 min). Kept in a
+// separate table from market_probability_points (which mirrors Polymarket) so the
+// two sources never collide even though they key on the same chain+address. Feeds
+// the /champion-history page via /api/worldcup/champion-pool-history.
+model PoolProbabilityPoint {
+  id              BigInt   @id @default(autoincrement())
+  chainId         Int
+  contractAddress String   @db.VarChar(42)
+  yesProbability  Float // percent, 0..100
+  capturedAt      DateTime @default(now())
+
+  @@index([chainId, contractAddress, capturedAt])
+  @@map("pool_probability_points")
+}
+
+// Daily net-P&L snapshot per wallet — one row per (address, UTC-day). Written by
+// the user-pnl snapshotter (services/user-pnl.ts) once a day: it scans every
+// EventMarket's trade/LP/redeem events to derive each wallet's net USDC invested,
+// reads current on-chain holdings to mark positions to market, and stores the
+// resulting cumulative P&L. Forward-only (no historical price backfill); the
+// portfolio page plots these points as the user's profit curve. Read-only
+// aggregation — never touches funds.
+model UserPnlDailySnapshot {
+  address       String   @db.VarChar(42) // lowercased
+  date          DateTime @db.Date // UTC start-of-day
+
+  // pnl = positionValue - netInvested (can be negative). positionValue is the
+  // mark-to-market value of held YES/NO tokens + LP share; netInvested is USDC
+  // put in (buys + LP adds) minus USDC taken out (sells + redeems + LP removes/claims).
+  pnl           Decimal @default(0)
+  positionValue Decimal @default(0)
+  netInvested   Decimal @default(0)
+
+  updatedAt DateTime @updatedAt
+
+  @@id([address, date])
+  @@index([address, date])
+  @@map("user_pnl_daily_snapshots")
+}

@@ -1,0 +1,232 @@
+# Project: 1v1 Betting Telegram Bot with Chainlink Integration
+
+## Project Overview
+This is a Telegram bot that enables instant 1v1 cryptocurrency price betting between users in group chats. The system uses Chainlink Runtime Environment (CRE) for decentralized price feeds and automated settlement.
+
+## Core Technology Stack
+- **Blockchain**: EVM-compatible chains (Ethereum, Polygon, Arbitrum, etc.)
+- **Chainlink Components**:
+  - Data Feeds: Decentralized price oracles for cryptocurrency prices
+  - Automation: Time-based automatic settlement execution
+  - CRE (Chainlink Runtime Environment): Workflow orchestration and automation
+- **Frontend**: Telegram Bot + WebApp (React, TailwindCSS, shadcn/ui)
+- **Smart Contracts**: Solidity (Factory pattern for bet creation)
+- **Backend**: Node.js/TypeScript for bot coordination
+- **Wallet Integration**: WalletConnect v2
+
+## Architecture Principles
+
+### 1. Trust Model
+- ALL financial logic MUST be on-chain and immutable
+- Bot is ONLY a coordinator, never holds funds or executes settlements
+- Price data MUST come from Chainlink Data Feeds only
+- Settlement MUST be triggered by Chainlink Automation only
+- No centralized backend can interfere with bet outcomes
+
+### 2. Smart Contract Design
+- Use Factory pattern for creating individual bet contracts
+- Each bet is an isolated contract instance
+- Bet parameters (amount, duration, asset) are immutable once created
+- Settlement logic is deterministic: endPrice > startPrice = UP, endPrice < startPrice = DOWN, equal = REFUND
+- Price precision must be consistent (use Chainlink Feed decimals)
+
+### 3. Security Requirements
+- Minimum bet duration: 3-5 minutes to reduce manipulation risk
+- Implement reentrancy guards on all fund-handling functions
+- Use SafeERC20 for token transfers
+- Validate all Chainlink oracle responses (check staleness, heartbeat)
+- Handle Automation delays gracefully with fallback mechanisms
+
+### 4. User Experience Flow
+- Users interact ONLY through Telegram (social layer)
+- Financial transactions happen ONLY in wallet (trust layer)
+- Bot updates a SINGLE message (no spam)
+- All amounts and addresses are pre-filled (no manual input)
+- Clear state transitions visible in group chat
+
+## Chainlink CRE Integration Rules
+
+### When Using CRE
+- Use existing CRE knowledge as baseline for implementation
+- Web-fetch latest documentation from chainlink-agent-skills/cre-skills/references/ only when:
+  - Implementing specific new features with uncertain APIs
+  - Encountering errors that may be due to API changes
+  - Need to verify recent updates or deprecations
+- Prefer TypeScript for CRE workflows unless explicitly requested otherwise
+
+### CRE Workflow Patterns
+- Use HTTP triggers for bot-initiated bet creation
+- Use Cron/Time triggers for scheduled settlement checks
+- Use EVM read capability to fetch Chainlink Data Feed prices
+- Use EVM write capability to call settlement functions
+- Store sensitive data (API keys, private keys) using CRE secrets management
+
+### Price Feed Integration
+- MUST use Chainlink Data Feeds for all price data
+- Check feed heartbeat and deviation threshold
+- Handle stale price data gracefully
+- Support multiple networks (use appropriate feed addresses per network)
+
+## Development Guidelines
+
+### Smart Contract Development
+- Use Foundry (forge, cast, anvil) for compilation, testing, and deployment
+- Write comprehensive tests in Solidity using forge-std
+- Test edge cases: equal prices, oracle failures, timeout scenarios
+- Use OpenZeppelin contracts for standard implementations
+- Document all functions with NatSpec comments
+- Emit events for all state changes for off-chain tracking
+
+### Development Tools
+- **Foundry**: Smart contract development, testing, and deployment
+- **CRE CLI**: Workflow management
+- **The Graph** (optional): Event indexing
+- **Tenderly**: Transaction simulation and debugging
+
+### Telegram Bot Development
+- Keep bot stateless (store state on-chain or in database)
+- Use inline keyboards for all user interactions
+- Update existing messages instead of sending new ones
+- Handle concurrent user actions gracefully
+- Provide clear error messages without exposing technical details
+
+### WebApp Development
+- Mobile-first responsive design
+- Show real-time countdown timers
+- Display Chainlink logo and "Powered by Chainlink" attribution
+- Show transaction status clearly (pending, confirmed, failed)
+- Allow users to return to incomplete bets
+
+### Testing Strategy
+- Unit tests for all smart contract functions
+- Integration tests for Chainlink oracle interactions
+- End-to-end tests for complete bet lifecycle
+- Simulation tests using CRE local environment
+- Test on testnet before mainnet deployment
+
+## Code Style and Conventions
+
+### Solidity
+- Use Solidity 0.8.x with explicit version
+- Follow Solidity style guide
+- Use explicit visibility modifiers
+- Prefer custom errors over require strings (gas optimization)
+- Use events for all state changes
+
+### TypeScript/JavaScript
+- Use TypeScript strict mode
+- Follow ESLint rules
+- Use async/await over promises
+- Handle all errors explicitly
+- Use environment variables for configuration
+
+### Git Commit Messages
+- Follow Conventional Commits specification
+- Format: `type(scope): description`
+- Types: feat, fix, chore, docs, test, refactor
+- Keep descriptions concise and imperative mood
+
+## File Organization (Monorepo)
+Each module is an independent directory with its own config and env files.
+Root directory contains ONLY: package.json (scripts to manage all modules), docs, and project-level config.
+NO .env or module-specific config files in root.
+```
+/contracts          - Foundry project (smart contracts)
+  /src              - Solidity source files
+  /test             - Forge tests (Solidity)
+  /script           - Forge deployment scripts
+  /foundry.toml     - Foundry config
+  /.env             - Contract-specific env vars
+/cre-workflows      - Chainlink CRE workflows (own package.json)
+/bot                - Telegram bot (own package.json, tsconfig, .env)
+/webapp             - Telegram WebApp (own package.json, vite config, .env)
+/docs               - Documentation
+/package.json       - Root scripts only (no deps), orchestrates all modules
+```
+
+## Environment-Specific Rules
+
+### Development
+- Use testnet (Sepolia, Mumbai, etc.)
+- Enable verbose logging
+- Use mock oracles for rapid testing when appropriate
+- Keep test data clearly marked
+
+### Production
+- NEVER hardcode private keys or API keys
+- Use environment variables for all secrets
+- Enable monitoring and alerting
+- Set appropriate gas limits and prices
+- Implement rate limiting on bot endpoints
+
+## Critical Constraints
+
+### Financial Safety
+- Bet amounts must be locked before start price is recorded
+- No partial withdrawals allowed
+- Settlement can only happen once
+- Failed settlements must allow manual intervention without breaking fairness
+
+### Oracle Reliability
+- Always check oracle response timestamp
+- Implement circuit breakers for oracle failures
+- Have fallback mechanisms for delayed Automation
+- Log all oracle calls for audit trail
+
+### User Protection
+- Clear cancellation policy (before both parties commit)
+- Automatic refund if counterparty doesn't join within timeout
+- Transparent fee structure (if any)
+- Clear dispute resolution process
+
+## When Implementing Features
+
+### Before Writing Code
+1. Verify which Chainlink components are needed
+2. Check if similar patterns exist in CRE documentation
+3. Identify security implications
+4. Plan testing strategy
+
+### During Development
+1. Write tests first for critical paths
+2. Use CRE simulation for workflow testing
+3. Validate all external data inputs
+4. Handle all error cases explicitly
+
+### Before Deployment
+1. Audit all smart contracts
+2. Test on testnet with real Chainlink oracles
+3. Verify gas costs are acceptable
+4. Ensure monitoring is in place
+5. Document deployment process
+
+## Reference Priority
+When answering questions or implementing features:
+1. Check develop_doc.md for business requirements
+2. Consult chainlink-agent-skills/cre-skills/ for Chainlink implementation patterns
+3. Web-fetch latest Chainlink documentation for specific APIs
+4. Follow security best practices for DeFi applications
+
+## Prohibited Actions
+- NEVER store user funds in bot wallet
+- NEVER allow bot to trigger settlements (only Chainlink Automation)
+- NEVER use centralized price sources
+- NEVER modify bet parameters after creation
+- NEVER skip input validation
+- NEVER expose private keys or secrets in code
+- NEVER deploy without testing on testnet first
+
+## Success Metrics
+- Zero fund loss incidents
+- Settlement accuracy: 100%
+- Automation reliability: >99.9%
+- User flow completion rate
+- Average time from bet creation to settlement
+- Gas cost per bet lifecycle
+
+## Documentation Requirements
+- All smart contracts must have NatSpec comments
+- All CRE workflows must have inline documentation
+- README must include setup instructions
+- API endpoints must be documented
+- Deployment process must be documented

@@ -1,0 +1,63 @@
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor / IDE
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ----- Contracts (Foundry) -----
+contracts/cache/
+contracts/out/
+contracts/broadcast/
+contracts/docs/
+
+# ----- Bot (TypeScript) -----
+bot/dist/
+bot/*.js
+bot/*.d.ts
+bot/*.js.map
+
+# ----- WebApp (Vite + React) -----
+webapp/dist/
+webapp/dist-ssr/
+
+# ----- CRE Workflows -----
+cre-workflows/*.wasm
+cre-workflows/bun.lock
+
+
+# Secrets
+secrets.yaml
+*.pem
+*.key
+.deploy
+.exclude
+.env.production
+docs/
+.webapp
+.xbot
+.cache
+documentation
+documentation/
