@@ -9,9 +9,9 @@ This repository contains the core platform logic and the surrounding tooling use
 The system is built around the idea of turning real-world questions into live, onchain markets:
 
 - Users can create or trade yes/no markets around events and assets
-- Liquidity providers can supply USDC to market pools and earn fees
+- Liquidity providers can supply USDG to market pools and earn fees
 - Prices are derived from AMM logic rather than an order book
-- Markets resolve to a final outcome and settle winners in USDC
+- Markets resolve to a final outcome and settle winners in USDG
 - Backend services monitor chain state, oracles, referrals, and user activity
 
 The repo is organized into four main parts:
@@ -25,7 +25,7 @@ The repo is organized into four main parts:
 
 ### Event markets
 
-Markets are modeled as AMM-based yes/no tokens backed by USDC. A market can be created with a question, schedule, and collateral. The contract structure allows:
+Markets are modeled as AMM-based yes/no tokens backed by USDG. A market can be created with a question, schedule, and collateral. The contract structure allows:
 
 - trading YES and NO positions
 - adding or removing liquidity
@@ -101,7 +101,7 @@ The backend is configured to support multiple supported chains, including Base S
 
 ## Key Features
 
-- Onchain prediction markets backed by USDC
+- Onchain prediction markets backed by USDG
 - Liquidity provision and AMM-based pricing
 - Market settlement and payout flows
 - Wallet authentication and session handling
