@@ -87,6 +87,11 @@ contract RobinhoodDeploymentPreflightTest is Test {
         harness.validate(USDG, deployer, feeRecipient, 0);
     }
 
+    function test_AcceptsMinimalPositiveGasBalance() public {
+        vm.deal(deployer, 1);
+        harness.validate(USDG, deployer, feeRecipient, 100e6);
+    }
+
     function test_RevertsOnInsufficientGasBalance() public {
         vm.deal(deployer, 0);
         vm.expectRevert(RobinhoodDeploymentPreflight.InsufficientGasBalance.selector);
