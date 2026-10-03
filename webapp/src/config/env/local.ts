@@ -52,6 +52,15 @@ const config: WebappEnvConfig = {
       explorerUrl: "https://testnet.arcscan.app/",
       isTestnet: true,
     },
+    46630: {
+      betFactoryAddress: "0x0000000000000000000000000000000000000000",
+      usdcAddress: "0x7E955252E15c84f5768B83c41a71F9eba181802F",
+      eventBetFactoryAddress: "0x0000000000000000000000000000000000000000",
+      priceOracleFactoryAddress: "0x0000000000000000000000000000000000000000",
+      predictionMarketFactoryAddress: "0x0000000000000000000000000000000000000000",
+      explorerUrl: "https://explorer.testnet.chain.robinhood.com",
+      isTestnet: true,
+    },
     // 97: {
     //   betFactoryAddress: "0x0000000000000000000000000000000000000000",
     //   usdcAddress: "0x49758E29b06cB7EeD00D21416dfb62c06B0503C7",

@@ -66,10 +66,12 @@ runs = 256
 base_sepolia = "${BASE_SEPOLIA_RPC_URL}"
 base_mainnet = "${BASE_MAINNET_RPC_URL}"
 arc_testnet  = "${ARC_TESTNET_RPC_URL}"
+robinhood_testnet = "${ROBINHOOD_RPC_URL}"
 
 [etherscan]
 base_sepolia = { key = "${BASESCAN_API_KEY}", url = "https://api.etherscan.io/v2/api?chainid=84532", chain = 84532 }
 base_mainnet = { key = "${BASESCAN_API_KEY}", url = "https://api.etherscan.io/v2/api?chainid=8453", chain = 8453 }
 # arc_testnet = { key = "${ARC_EXPLORER_API_KEY}", url = "https://arc-testnet.drpc.org/api", chain = 5042002 }
+robinhood_testnet = { key = "${ROBINHOOD_EXPLORER_API_KEY}", url = "https://explorer.testnet.chain.robinhood.com/api/", chain = 46630 }
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

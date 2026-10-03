@@ -2,13 +2,15 @@ import { http, createConfig } from 'wagmi'
 import { baseSepolia, base, bscTestnet } from 'wagmi/chains'
 import { injected } from 'wagmi/connectors'
 import { arcTestnet } from './chains'
+import { resolveRobinhoodRpcUrl, robinhoodTestnet } from './robinhood'
 
 const BASE_RPC_URL = import.meta.env.VITE_BASE_RPC_URL || undefined
 const BASE_SEPOLIA_RPC_URL = import.meta.env.VITE_BASE_SEPOLIA_RPC_URL || undefined
 const BSC_TESTNET_RPC_URL = import.meta.env.VITE_BSC_TESTNET_RPC_URL || 'https://bnb-testnet.g.alchemy.com/v2/RZKLdozAv95H_gtPTsOm-'
+const ROBINHOOD_RPC_URL = resolveRobinhoodRpcUrl(import.meta.env.VITE_ROBINHOOD_RPC_URL)
 
 // All chains the app supports — add more here as needed
-const chains = [baseSepolia, base, arcTestnet, bscTestnet] as const
+const chains = [baseSepolia, base, arcTestnet, bscTestnet, robinhoodTestnet] as const
 
 export const config = createConfig({
   chains,
@@ -31,6 +33,7 @@ export const config = createConfig({
     [base.id]: http(BASE_RPC_URL),
     [arcTestnet.id]: http(),
     [bscTestnet.id]: http(BSC_TESTNET_RPC_URL),
+    [robinhoodTestnet.id]: http(ROBINHOOD_RPC_URL),
   },
 })
 

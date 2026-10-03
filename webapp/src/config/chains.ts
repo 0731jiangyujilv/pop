@@ -1,6 +1,11 @@
 import { type Chain } from 'viem'
 import { baseSepolia, bscTestnet } from 'viem/chains'
 import { envConfig, type WebappChainEntry } from './env'
+import {
+  ROBINHOOD_CHAIN_SLUG,
+  ROBINHOOD_CHAIN_SLUG_ALIAS,
+  robinhoodTestnet,
+} from './robinhood'
 
 export type ChainConfig = {
   chain: Chain
@@ -31,6 +36,7 @@ const viemChains: Record<number, Chain> = {
   [arcTestnet.id]: arcTestnet,
   [baseSepolia.id]: baseSepolia,
   [bscTestnet.id]: bscTestnet,
+  [robinhoodTestnet.id]: robinhoodTestnet,
 }
 
 // Build SUPPORTED_CHAINS from env config
@@ -72,6 +78,8 @@ export const CHAIN_SLUGS: Record<string, number> = {
   'arc-testnet': arcTestnet.id,
   'base-sepolia': baseSepolia.id,
   'bsc-testnet': bscTestnet.id,
+  [ROBINHOOD_CHAIN_SLUG]: robinhoodTestnet.id,
+  [ROBINHOOD_CHAIN_SLUG_ALIAS]: robinhoodTestnet.id,
 }
 
 export function getChainIdBySlug(slug: string | null | undefined): number | undefined {
