@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+.pnpm-store/
 
 # Environment variables
 .env
@@ -55,7 +56,8 @@ secrets.yaml
 .deploy
 .exclude
 .env.production
-docs/
+# Repository release docs in /docs are tracked. Foundry-generated contract
+# docs remain ignored via contracts/.gitignore.
 .webapp
 .xbot
 .cache

@@ -39,4 +39,6 @@ The default `contracts/test/` path will continue to include all executable tests
 - OddsShift flow scripts;
 - active mocks used by those suites.
 
-The historical files remain versioned under `contracts/legacy-tests/` with an explicit README. That directory is outside Foundry's default `test = "test"` path; no broad `skip` pattern will be added.
+The historical files remain versioned under `contracts/legacy-tests/` with an explicit README. Foundry 1.7 can otherwise walk every `.sol` file when auto-detecting compiler versions, so `foundry.toml` pins `solc = "0.8.24"`, sets `auto_detect_solc = false`, and structurally excludes `.cache/**` and `legacy-tests/**` from the default compile. No file inside `contracts/test/` is skipped by name.
+
+After the later security-invariant and Robinhood deploy-script tests, the default suite is 133 tests, 0 skipped.
