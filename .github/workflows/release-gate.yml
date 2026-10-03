@@ -1,0 +1,45 @@
+name: POP release gate
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: release-gate-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Local judge commands
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.7.1
+
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.17.1
+
+      - name: Install Slither and ripgrep
+        run: |
+          python3 -m pip install --user slither-analyzer==0.11.6
+          sudo apt-get update
+          sudo apt-get install -y ripgrep
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Run the same release-gate script a judge runs locally
+        run: ./scripts/validate-release.sh
