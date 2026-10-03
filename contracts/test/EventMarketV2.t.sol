@@ -59,7 +59,7 @@ contract EventMarketV2Test is Test {
         bettingDeadline = block.timestamp + 1 days;
         resolveAfter = bettingDeadline + 2 hours;
 
-        usdc = new MockERC20("USD Coin", "USDC", 6);
+        usdc = new MockERC20("Global Dollar", "USDG", 6);
 
         creator = owner;
 
@@ -819,6 +819,13 @@ contract EventMarketV2Test is Test {
         p = _params();
         p.cooldown = 0;
         _expectBadParams(p);
+    }
+
+    function test_RevertsOnZeroCollateralToken() public {
+        EventMarketV2.Params memory p = _params();
+        p.usdc = address(0);
+        vm.expectRevert(IEventMarketV2.ZeroCollateralToken.selector);
+        new EventMarketV2(p);
     }
 
     function _expectBadParams(EventMarketV2.Params memory p) internal {
