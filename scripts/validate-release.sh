@@ -20,21 +20,23 @@ ensure_pnpm() {
   if command -v pnpm >/dev/null 2>&1; then
     return
   fi
+
+  local local_pnpm="$root/.tools/node_modules/.bin/pnpm"
+  if [[ -x "$local_pnpm" ]]; then
+    PATH="$(dirname "$local_pnpm"):$PATH"
+    export PATH
+    command -v pnpm >/dev/null 2>&1 && return
+  fi
+
   if command -v corepack >/dev/null 2>&1; then
-    # CI/non-TTY environments cannot rewrite global bin symlinks; prefer
-    # corepack's shims when `pnpm` is not already on PATH.
+    # CI/non-TTY environments cannot always rewrite global bin symlinks.
     if corepack enable >/dev/null 2>&1; then
       corepack prepare pnpm@10.17.1 --activate >/dev/null 2>&1 || true
     fi
     command -v pnpm >/dev/null 2>&1 && return
-    if command -v npx >/dev/null 2>&1; then
-      # Fallback used by local sandboxes that cannot mutate the Node bin dir.
-      pnpm() { npx --yes pnpm@10.17.1 "$@"; }
-      export -f pnpm
-      return
-    fi
   fi
-  fail "pnpm is required (install via corepack or the pnpm installer)"
+
+  fail "pnpm is required (install via corepack, the pnpm installer, or npm install pnpm@10.17.1 into .tools/)"
 }
 
 echo "==> versions"

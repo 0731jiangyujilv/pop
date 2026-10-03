@@ -63,3 +63,5 @@ secrets.yaml
 .cache
 documentation
 documentation/
+# Local tool installs for release-gate sandboxes
+.tools/
