@@ -1,5 +1,9 @@
 # Deployment Guide
 
+For the Robinhood Chain Testnet USDG OddsShift deployment, see
+[`../docs/ROBINHOOD_USDG_DEPLOYMENT_PLAN.md`](../docs/ROBINHOOD_USDG_DEPLOYMENT_PLAN.md)
+and [`../docs/ROBINHOOD_USDG_DEMO_RUNBOOK.md`](../docs/ROBINHOOD_USDG_DEMO_RUNBOOK.md).
+
 All deploy commands use Foundry (`forge script`). Before deploying, configure `contracts/.env` (see `.env.example`).
 
 ## Prerequisites
