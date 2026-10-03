@@ -7,9 +7,11 @@ import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IER
 library RobinhoodDeploymentPreflight {
     uint256 internal constant ROBINHOOD_TESTNET_CHAIN_ID = 46_630;
     uint8 internal constant USDG_DECIMALS = 6;
+    address internal constant OFFICIAL_ROBINHOOD_USDG = 0x7E955252E15c84f5768B83c41a71F9eba181802F;
 
     error WrongChain(uint256 actual);
     error ZeroCollateral();
+    error UnexpectedUsdGAddress(address actual);
     error CollateralHasNoCode(address collateral);
     error WrongCollateralSymbol(string actual);
     error UnsupportedCollateralDecimals(uint8 actual);
@@ -24,6 +26,7 @@ library RobinhoodDeploymentPreflight {
     {
         if (block.chainid != ROBINHOOD_TESTNET_CHAIN_ID) revert WrongChain(block.chainid);
         if (collateral == address(0)) revert ZeroCollateral();
+        if (collateral != OFFICIAL_ROBINHOOD_USDG) revert UnexpectedUsdGAddress(collateral);
         if (collateral.code.length == 0) revert CollateralHasNoCode(collateral);
         if (feeRecipient == address(0)) revert ZeroFeeRecipient();
         if (initialLiquidity == 0) revert ZeroInitialLiquidity();
