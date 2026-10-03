@@ -111,32 +111,29 @@ contract EventMarketTest is Test {
         assertEq(market.creatorFeeBps(), 30);
     }
 
-    function test_init_bootstrapHalfLpHalfBuy() public view {
-        // 50 USDC LP + 50 USDC YES buy (initialSide=true).
-        // After mint+swap: yesReserve = 50M * 50M / (50M + 49.5M) = 25_125_628.
-        // Creator gets 50M (minted) + 24_874_372 (swap) ≈ 74.874M YES.
+    function test_init_bootstrapLocksAllSeedAsBalancedLiquidity() public view {
+        // The full creator seed initializes a balanced CPMM and is locked as LP
+        // liquidity. Bootstrap does not place a directional trade for the creator.
         assertEq(market.totalCollateral(), 100e6, "TC");
-        assertEq(market.noReserve(), 100e6, "noReserve = 50 + 50 from buy");
-        assertApproxEqAbs(market.yesReserve(), 25_125_628, 2, "yesReserve");
+        assertEq(market.yesReserve(), 100e6, "balanced YES reserve");
+        assertEq(market.noReserve(), 100e6, "balanced NO reserve");
 
-        assertApproxEqAbs(market.yesBalanceOf(creator), 74_874_372, 2, "creator YES");
+        assertEq(market.yesBalanceOf(creator), 0, "creator has no directional YES");
         assertEq(market.noBalanceOf(creator), 0);
 
-        assertEq(market.totalLpShares(), 50e6);
-        assertEq(market.lpShares(creator), 50e6);
-        assertEq(market.lockedLpShares(creator), 50e6);
+        assertEq(market.totalLpShares(), 100e6);
+        assertEq(market.lpShares(creator), 100e6);
+        assertEq(market.lockedLpShares(creator), 100e6);
         assertEq(uint8(market.status()), uint8(IEventMarket.Status.Open));
 
         _checkInvariants();
     }
 
-    function test_init_yesProbabilitySkewedAfterInitiatorBuy() public view {
-        // pYes = noReserve / (yes + no) ≈ 0.799
+    function test_init_probabilityStartsBalanced() public view {
         uint256 pYes = market.yesProbability();
-        assertGt(pYes, 0.79e18);
-        assertLt(pYes, 0.80e18);
-        // Off-by-one from integer division is expected.
-        assertApproxEqAbs(pYes + market.noProbability(), ONE, 1);
+        assertEq(pYes, ONE / 2);
+        assertEq(market.noProbability(), ONE / 2);
+        assertEq(pYes + market.noProbability(), ONE);
     }
 
     function test_init_revert_doubleInitialize() public {
@@ -329,13 +326,13 @@ contract EventMarketTest is Test {
         assertEq(market.yesReserve(), yesRes + addAmt);
         assertEq(market.noReserve(), noRes + addAmt);
 
-        // Implied probability moves slightly toward 50/50 (more USDC dilutes the skew).
+        // Balanced, symmetric liquidity leaves implied probability unchanged.
         uint256 pYesAfter = market.yesProbability();
-        assertLt(pYesAfter, pYesBefore, "pYes should drop toward 0.5");
+        assertEq(pYesAfter, pYesBefore, "symmetric liquidity preserves price");
 
         // shares = addAmt * totalLpShares / totalCollateral_before
-        // = 20e6 * 50e6 / 100e6 = 10e6
-        assertEq(shares, 10e6);
+        // = 20e6 * 100e6 / 100e6 = 20e6
+        assertEq(shares, 20e6);
         assertEq(market.lpShares(lp1), shares);
         assertEq(market.lockedLpShares(lp1), 0, "new LP not locked");
     }
@@ -708,10 +705,9 @@ contract EventMarketTest is Test {
         // Everyone with YES or LP claims.
         vm.prank(alice);
         market.redeemYes(aliceYes);
-        // Creator holds both LP shares AND the initiator-buy YES; both must be redeemed.
+        // Bootstrap creates only locked LP shares, not a creator outcome position.
         uint256 creatorYes = market.yesBalanceOf(creator);
-        vm.prank(creator);
-        market.redeemYes(creatorYes);
+        assertEq(creatorYes, 0, "creator has no bootstrap YES to redeem");
         vm.prank(creator);
         market.claimLpPayout();
         vm.prank(lp1);
