@@ -42,10 +42,7 @@ contract ResolveEventMarket is Script {
                 ? "Market is still Open (bettingDeadline not reached yet)"
                 : "Market is already Settled"
         );
-        require(
-            block.timestamp >= market.resolveAfter(),
-            "resolveAfter timestamp not reached yet"
-        );
+        require(block.timestamp >= market.resolveAfter(), "resolveAfter timestamp not reached yet");
 
         // --- Print state before settlement ---
         console.log("\n=== EventMarket Pre-Settlement State ===");
@@ -61,11 +58,9 @@ contract ResolveEventMarket is Script {
 
         // Estimate fee disbursements (off-chain preview)
         uint256 platformFee = info.totalCollateral * info.platformFeeBps / 10_000;
-        uint256 creatorFee  = info.totalCollateral * info.creatorFeeBps / 10_000;
-        uint256 remaining   = info.totalCollateral - platformFee - creatorFee;
-        uint256 netPerToken = info.totalCollateral == 0
-            ? 0
-            : remaining * 1e18 / info.totalCollateral;
+        uint256 creatorFee = info.totalCollateral * info.creatorFeeBps / 10_000;
+        uint256 remaining = info.totalCollateral - platformFee - creatorFee;
+        uint256 netPerToken = info.totalCollateral == 0 ? 0 : remaining * 1e18 / info.totalCollateral;
 
         console.log("\n--- Projected Fees ---");
         console.log("platformFee (USDC units):", platformFee);

@@ -110,10 +110,7 @@ contract EventMarketV2Test is Test {
         return _trade(id).outcome;
     }
 
-    function _assertOutcome(uint256 id, IEventMarketV2.TradeOutcome want, string memory why)
-        internal
-        view
-    {
+    function _assertOutcome(uint256 id, IEventMarketV2.TradeOutcome want, string memory why) internal view {
         assertEq(this.outcomeOf(id), uint8(want), why);
     }
 
@@ -167,8 +164,7 @@ contract EventMarketV2Test is Test {
     ///      frozen after settlement because it is the denominator of
     ///      netUsdcPerToken, so it is not a liability figure any more.
     function _assertSolvent() internal view {
-        uint256 owed =
-            market.pendingEscrow() + market.totalRebateOwed() + market.totalLpRewardOwed();
+        uint256 owed = market.pendingEscrow() + market.totalRebateOwed() + market.totalLpRewardOwed();
 
         if (market.status() != IEventMarket.Status.Settled) {
             owed += market.totalCollateral();
@@ -203,8 +199,8 @@ contract EventMarketV2Test is Test {
     }
 
     function _outcomeClaimOf(address a) internal view returns (uint256) {
-        return market.yesBalanceOf(a) * market.netUsdcPerYesToken() / ONE
-            + market.noBalanceOf(a) * market.netUsdcPerNoToken() / ONE;
+        return market.yesBalanceOf(a) * market.netUsdcPerYesToken() / ONE + market.noBalanceOf(a)
+            * market.netUsdcPerNoToken() / ONE;
     }
 
     /// @dev Upper bound on USDC that can be stranded by flooring once every actor
@@ -352,9 +348,7 @@ contract EventMarketV2Test is Test {
 
         assertEq(market.pendingEscrow(), _prot(spend), "0.70% escrowed");
         assertEq(_os().cumBaseFee, _base(spend), "0.30% banked");
-        assertEq(
-            _lpClaimable(creator), _base(spend), "base fee is the LPs' immediately"
-        );
+        assertEq(_lpClaimable(creator), _base(spend), "base fee is the LPs' immediately");
         assertEq(
             market.totalCollateral(),
             INIT_LIQUIDITY + spend - _base(spend) - _prot(spend),
@@ -533,9 +527,7 @@ contract EventMarketV2Test is Test {
         assertEq(market.nextToResolve(), 5);
         assertEq(market.pendingEscrow(), _prot(6e6));
         assertEq(
-            market.getOddsShiftInfo().windowAnchorProb,
-            _trade(5).pBefore,
-            "the next window re-anchors after the shock"
+            market.getOddsShiftInfo().windowAnchorProb, _trade(5).pBefore, "the next window re-anchors after the shock"
         );
 
         uint256 before = usdc.balanceOf(alice);

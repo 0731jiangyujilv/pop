@@ -122,36 +122,18 @@ interface IEventMarketV2 is IEventMarket {
     //////////////////////////////////////////////////////////////*/
 
     event TradeRecorded(
-        uint256 indexed tradeId,
-        address indexed trader,
-        uint256 baseFee,
-        uint256 escrow,
-        uint64 pBefore,
-        uint64 pAfter
+        uint256 indexed tradeId, address indexed trader, uint256 baseFee, uint256 escrow, uint64 pBefore, uint64 pAfter
     );
 
     /// @param firstTradeId First trade of the window this shock judges.
     /// @param triggerTradeId The trade that tripped `jumpThreshold`.
     event ShockDetected(
-        uint256 indexed shockId,
-        uint32 firstTradeId,
-        uint32 triggerTradeId,
-        uint64 pAnchor,
-        uint64 pShock,
-        int8 dir
+        uint256 indexed shockId, uint32 firstTradeId, uint32 triggerTradeId, uint64 pAnchor, uint64 pShock, int8 dir
     );
 
-    event ShockResolved(
-        uint256 indexed shockId, bool reverted, uint64 pEnd, uint256 refunded, uint256 charged
-    );
+    event ShockResolved(uint256 indexed shockId, bool reverted, uint64 pEnd, uint256 refunded, uint256 charged);
 
-    event TradeJudged(
-        uint256 indexed tradeId,
-        address indexed trader,
-        uint256 escrow,
-        uint8 outcome,
-        uint256 shockId
-    );
+    event TradeJudged(uint256 indexed tradeId, address indexed trader, uint256 escrow, uint8 outcome, uint256 shockId);
 
     event RebateClaimed(address indexed trader, uint256 amount);
     event LpRewardClaimed(address indexed lp, uint256 amount);

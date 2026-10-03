@@ -161,8 +161,7 @@ contract EventMarket is IEventMarket, ReentrancyGuard {
         if (p.lpSwapFeeBps > MAX_LP_SWAP_FEE_BPS) revert FeeTooHigh();
         if (p.platformFeeBps + p.creatorFeeBps > MAX_PROTOCOL_FEE_BPS) revert FeeTooHigh();
         if (p.bettingDeadline <= block.timestamp) revert InvalidDeadline();
-        uint256 resolveAfter_ =
-            p.resolveAfter == 0 ? p.bettingDeadline + DEFAULT_RESOLVE_WINDOW : p.resolveAfter;
+        uint256 resolveAfter_ = p.resolveAfter == 0 ? p.bettingDeadline + DEFAULT_RESOLVE_WINDOW : p.resolveAfter;
         if (resolveAfter_ < p.bettingDeadline) revert InvalidResolveTime();
 
         usdc = IERC20(p.usdc);
@@ -187,10 +186,7 @@ contract EventMarket is IEventMarket, ReentrancyGuard {
     /// @notice Factory-only single-call market bootstrap. All of `initLiquidity`
     ///         seeds the AMM pool as LOCKED Initiator LP. USDC must be in this
     ///         contract already; the factory transfers it before calling.
-    function initializeMarket(address creator_, uint256 initLiquidity)
-        external
-        onlyFactory
-    {
+    function initializeMarket(address creator_, uint256 initLiquidity) external onlyFactory {
         if (status != Status.Open) revert WrongStatus();
         if (totalLpShares != 0) revert AlreadyInitialized();
         if (initLiquidity == 0) revert ZeroAmount();
@@ -215,10 +211,7 @@ contract EventMarket is IEventMarket, ReentrancyGuard {
 
     /// @dev Symmetric injection: same USDC enters both reserves so implied
     ///      probability doesn't move. New LP's exposure is symmetric.
-    function _addLiquidity(address provider, uint256 usdcAmount, bool lockShares)
-        internal
-        returns (uint256 shares)
-    {
+    function _addLiquidity(address provider, uint256 usdcAmount, bool lockShares) internal returns (uint256 shares) {
         if (usdcAmount == 0) revert ZeroAmount();
 
         if (totalLpShares == 0) {
@@ -291,11 +284,7 @@ contract EventMarket is IEventMarket, ReentrancyGuard {
                                  BUY
     //////////////////////////////////////////////////////////////*/
 
-    function buyYes(uint256 usdcAmount, uint256 minYesOut)
-        external
-        nonReentrant
-        returns (uint256 yesOut)
-    {
+    function buyYes(uint256 usdcAmount, uint256 minYesOut) external nonReentrant returns (uint256 yesOut) {
         _maybeLock();
         if (status != Status.Open) revert WrongStatus();
 
@@ -305,11 +294,7 @@ contract EventMarket is IEventMarket, ReentrancyGuard {
         emit BoughtYes(msg.sender, usdcAmount, yesOut);
     }
 
-    function buyNo(uint256 usdcAmount, uint256 minNoOut)
-        external
-        nonReentrant
-        returns (uint256 noOut)
-    {
+    function buyNo(uint256 usdcAmount, uint256 minNoOut) external nonReentrant returns (uint256 noOut) {
         _maybeLock();
         if (status != Status.Open) revert WrongStatus();
 
@@ -359,11 +344,7 @@ contract EventMarket is IEventMarket, ReentrancyGuard {
     ///         reverse of buyYes: swap part of the YES through the pool for NO,
     ///         then pair-redeem the matched YES+NO into USDC. The swap+redeem
     ///         math is fused here so the caller only signs one transaction.
-    function sellYes(uint256 yesAmount, uint256 minUsdcOut)
-        external
-        nonReentrant
-        returns (uint256 usdcOut)
-    {
+    function sellYes(uint256 yesAmount, uint256 minUsdcOut) external nonReentrant returns (uint256 usdcOut) {
         _maybeLock();
         if (status != Status.Open) revert WrongStatus();
         usdcOut = _sellYes(msg.sender, yesAmount);
@@ -371,11 +352,7 @@ contract EventMarket is IEventMarket, ReentrancyGuard {
         emit SoldYes(msg.sender, yesAmount, usdcOut);
     }
 
-    function sellNo(uint256 noAmount, uint256 minUsdcOut)
-        external
-        nonReentrant
-        returns (uint256 usdcOut)
-    {
+    function sellNo(uint256 noAmount, uint256 minUsdcOut) external nonReentrant returns (uint256 usdcOut) {
         _maybeLock();
         if (status != Status.Open) revert WrongStatus();
         usdcOut = _sellNo(msg.sender, noAmount);
@@ -477,10 +454,7 @@ contract EventMarket is IEventMarket, ReentrancyGuard {
 
     /// @notice Admin may correct the market's question / resolution source until
     ///         it settles. Blocked once Settled so the resolved record is fixed.
-    function setMetadata(string calldata question_, string calldata resolutionSource_)
-        external
-        onlyAdmin
-    {
+    function setMetadata(string calldata question_, string calldata resolutionSource_) external onlyAdmin {
         if (status == Status.Settled) revert WrongStatus();
         question = question_;
         resolutionSource = resolutionSource_;
@@ -712,11 +686,7 @@ contract EventMarket is IEventMarket, ReentrancyGuard {
     /// @notice Market state + a user's balances + cumulative USDC flows in one call, so
     ///         the backend can compute value / invested / P&L / ROI from a single eth_call
     ///         with no historical event scanning.
-    function getUserState(address u)
-        external
-        view
-        returns (MarketInfo memory info, UserState memory pos)
-    {
+    function getUserState(address u) external view returns (MarketInfo memory info, UserState memory pos) {
         info = _marketInfo();
         pos = UserState({
             yesBalance: yesBalanceOf[u],
@@ -799,21 +769,13 @@ contract EventMarket is IEventMarket, ReentrancyGuard {
     /// @dev x*y=k with input-side fee. Full `noIn` enters the reserve; only
     ///      `effectiveIn = noIn * (BPS - lpSwapFeeBps) / BPS` is used for the
     ///      output calc, so k grows by exactly the fee and LPs accrue value.
-    function _calcNoForYes(uint256 noIn, uint256 yesRes, uint256 noRes)
-        internal
-        view
-        returns (uint256)
-    {
+    function _calcNoForYes(uint256 noIn, uint256 yesRes, uint256 noRes) internal view returns (uint256) {
         if (yesRes == 0 || noRes == 0) return 0;
         uint256 effectiveIn = noIn * (BPS - lpSwapFeeBps) / BPS;
         return yesRes * effectiveIn / (noRes + effectiveIn);
     }
 
-    function _calcYesForNo(uint256 yesIn, uint256 yesRes, uint256 noRes)
-        internal
-        view
-        returns (uint256)
-    {
+    function _calcYesForNo(uint256 yesIn, uint256 yesRes, uint256 noRes) internal view returns (uint256) {
         if (yesRes == 0 || noRes == 0) return 0;
         uint256 effectiveIn = yesIn * (BPS - lpSwapFeeBps) / BPS;
         return noRes * effectiveIn / (yesRes + effectiveIn);
@@ -831,11 +793,7 @@ contract EventMarket is IEventMarket, ReentrancyGuard {
     ///          φ·s² + (reserveIn·BPS + reserveOut·φ − amount·φ)·s
     ///                 − amount·reserveIn·BPS = 0
     ///      and `s` is its positive root.
-    function _solveExitSwap(uint256 amount, uint256 reserveIn, uint256 reserveOut)
-        internal
-        view
-        returns (uint256 s)
-    {
+    function _solveExitSwap(uint256 amount, uint256 reserveIn, uint256 reserveOut) internal view returns (uint256 s) {
         uint256 phi = BPS - lpSwapFeeBps;
         uint256 ab = reserveIn * BPS + reserveOut * phi; // the linear coefficient's positive part
         uint256 c = amount * phi;

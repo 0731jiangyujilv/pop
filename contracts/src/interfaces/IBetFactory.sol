@@ -4,13 +4,7 @@ pragma solidity ^0.8.24;
 /// @title IBetFactory - Interface for the Bet Factory contract
 /// @notice Defines the external interface for creating and managing multi-side bets
 interface IBetFactory {
-    event BetCreated(
-        uint256 indexed betId,
-        address betContract,
-        address indexed creator,
-        address token,
-        string asset
-    );
+    event BetCreated(uint256 indexed betId, address betContract, address indexed creator, address token, string asset);
 
     error InvalidAmount();
     error InvalidDuration();

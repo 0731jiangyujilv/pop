@@ -6,9 +6,9 @@ pragma solidity ^0.8.24;
 ///         results) where resolution comes from an admin (no price oracle).
 interface IEventMarket {
     enum Status {
-        Open,    // Accepting bets and liquidity
-        Locked,  // bettingDeadline reached: no swaps / no addLiquidity; removeLiquidity + redeemPair still allowed
-        Settled  // Admin has resolved (or emergency draw fired)
+        Open, // Accepting bets and liquidity
+        Locked, // bettingDeadline reached: no swaps / no addLiquidity; removeLiquidity + redeemPair still allowed
+        Settled // Admin has resolved (or emergency draw fired)
     }
 
     struct MarketInfo {
@@ -89,18 +89,10 @@ interface IEventMarket {
                                 EVENTS
     //////////////////////////////////////////////////////////////*/
 
-    event MarketInitialized(
-        address indexed creator,
-        uint256 lpUsdc,
-        uint256 lockedShares
-    );
+    event MarketInitialized(address indexed creator, uint256 lpUsdc, uint256 lockedShares);
     event LiquidityAdded(address indexed provider, uint256 usdcAmount, uint256 shares, bool locked);
     event LiquidityRemoved(
-        address indexed provider,
-        uint256 sharesBurned,
-        uint256 usdcOut,
-        uint256 yesOut,
-        uint256 noOut
+        address indexed provider, uint256 sharesBurned, uint256 usdcOut, uint256 yesOut, uint256 noOut
     );
     event BoughtYes(address indexed buyer, uint256 usdcIn, uint256 yesOut);
     event BoughtNo(address indexed buyer, uint256 usdcIn, uint256 noOut);

@@ -94,9 +94,7 @@ contract OddsShiftToxicFlow is OddsShiftFlowBase {
         // second shock instead of retiring as RefundedNoShock — no refunds
         // anywhere in this flow.
         require(step * i.observeWindow > i.jumpThreshold, "observation window would retire clean");
-        require(
-            uint256(p0) + step * total < PROB_ONE - 5 * POINT, "market is too close to 100%"
-        );
+        require(uint256(p0) + step * total < PROB_ONE - 5 * POINT, "market is too close to 100%");
 
         console.log("--- plan ---");
         console.log(
@@ -151,8 +149,7 @@ contract OddsShiftToxicFlow is OddsShiftFlowBase {
         require(after_.totalShocks == before.totalShocks + 2, "expected two new shocks");
         IEventMarketV2.Shock memory s = m.getShocks(after_.totalShocks - 2, 1)[0];
         require(
-            s.outcome == uint8(IEventMarketV2.ShockOutcome.Toxic),
-            "shock did not turn toxic - check the pool depth"
+            s.outcome == uint8(IEventMarketV2.ShockOutcome.Toxic), "shock did not turn toxic - check the pool depth"
         );
         require(after_.cumRebated == before.cumRebated, "something was refunded");
         require(after_.cumChargedFee > before.cumChargedFee, "nothing was charged");
@@ -173,11 +170,7 @@ contract OddsShiftToxicFlow is OddsShiftFlowBase {
             )
         );
         console.log(
-            string.concat(
-                "  charged this run: ",
-                _amt(after_.cumChargedFee - before.cumChargedFee),
-                "   refunded: 0"
-            )
+            string.concat("  charged this run: ", _amt(after_.cumChargedFee - before.cumChargedFee), "   refunded: 0")
         );
         console.log("");
     }
@@ -189,10 +182,7 @@ contract OddsShiftToxicFlow is OddsShiftFlowBase {
         uint256 n = uint256(s.triggerId) - s.firstId + 1;
         IEventMarketV2.Trade[] memory ts = m.getTrades(s.firstId, n);
         for (uint256 i = 0; i < ts.length; ++i) {
-            require(
-                ts[i].outcome == uint8(IEventMarketV2.TradeOutcome.Charged),
-                "a window trade escaped the charge"
-            );
+            require(ts[i].outcome == uint8(IEventMarketV2.TradeOutcome.Charged), "a window trade escaped the charge");
         }
     }
 

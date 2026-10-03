@@ -5,11 +5,7 @@ pragma solidity ^0.8.24;
 /// @notice Defines the external interface for creating and managing event bets
 interface IEventBetFactory {
     event EventBetCreated(
-        uint256 indexed betId,
-        address betContract,
-        address indexed creator,
-        address token,
-        string question
+        uint256 indexed betId, address betContract, address indexed creator, address token, string question
     );
 
     error InvalidAmount();

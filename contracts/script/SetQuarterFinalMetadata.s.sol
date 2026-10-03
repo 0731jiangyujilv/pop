@@ -74,9 +74,8 @@ contract SetQuarterFinalMetadata is Script {
             require(info.admin == admin, "PRIVATE_KEY is not this market's admin");
             require(info.status != IEventMarket.Status.Settled, "market already settled");
 
-            string memory question = string.concat(
-                homeFlag[i], " ", home[i], " vs ", awayFlag[i], " ", away[i], "/", home[i], " win"
-            );
+            string memory question =
+                string.concat(homeFlag[i], " ", home[i], " vs ", awayFlag[i], " ", away[i], "/", home[i], " win");
             string memory resolutionSource = string.concat(
                 "FIFA official full-time result (admin-reported). YES = ",
                 home[i],

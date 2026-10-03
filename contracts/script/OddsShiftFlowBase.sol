@@ -90,9 +90,7 @@ abstract contract OddsShiftFlowBase is Script {
     function _prepare() internal {
         uint256 budget = m.yesReserve() + m.noReserve(); // ~5x the deepest demo
         if (token.balanceOf(trader) < budget) {
-            (bool ok,) = address(token).call(
-                abi.encodeWithSignature("mint(address,uint256)", trader, budget)
-            );
+            (bool ok,) = address(token).call(abi.encodeWithSignature("mint(address,uint256)", trader, budget));
             require(ok, "not enough balance and the token has no open mint() - fund the trader");
         }
         if (token.allowance(trader, address(m)) < budget) {
@@ -124,9 +122,7 @@ abstract contract OddsShiftFlowBase is Script {
                 vm.toString(i.pendingCount),
                 " trades pending from #",
                 vm.toString(i.nextToResolve),
-                i.shockOpen
-                    ? string.concat(", under open shock #", vm.toString(i.openShockId))
-                    : ""
+                i.shockOpen ? string.concat(", under open shock #", vm.toString(i.openShockId)) : ""
             )
         );
         console.log("  Drain the queue first, then run this flow again:");
@@ -277,13 +273,7 @@ abstract contract OddsShiftFlowBase is Script {
         console.log(string.concat("  collateral  : ", _amt(m.totalCollateral())));
         console.log(string.concat("  probability : ", _pct(_prob())));
         console.log(
-            string.concat(
-                "  fee         : ",
-                _bps(i.baseFeeBps),
-                " base + ",
-                _bps(i.protectionFeeBps),
-                " protection"
-            )
+            string.concat("  fee         : ", _bps(i.baseFeeBps), " base + ", _bps(i.protectionFeeBps), " protection")
         );
         console.log(
             string.concat(
@@ -321,9 +311,7 @@ abstract contract OddsShiftFlowBase is Script {
             string.concat(
                 "  shocks       : ",
                 vm.toString(i.totalShocks),
-                i.shockOpen
-                    ? string.concat(" (#", vm.toString(i.openShockId), " still observing)")
-                    : ""
+                i.shockOpen ? string.concat(" (#", vm.toString(i.openShockId), " still observing)") : ""
             )
         );
         console.log(string.concat("  escrow held  : ", _amt(i.pendingEscrow)));
@@ -377,17 +365,13 @@ abstract contract OddsShiftFlowBase is Script {
 
     /// @dev 1e6 fixed point as a percentage, two decimals.
     function _pct(uint64 p) internal pure returns (string memory) {
-        return string.concat(
-            vm.toString(uint256(p) / 10_000), ".", _pad2(uint256(p) % 10_000 / 100), "%"
-        );
+        return string.concat(vm.toString(uint256(p) / 10_000), ".", _pad2(uint256(p) % 10_000 / 100), "%");
     }
 
     /// @dev Signed displacement between two probabilities, in points.
     function _signedPts(uint64 a, uint64 b) internal pure returns (string memory) {
         (uint256 d, bool neg) = b >= a ? (uint256(b - a), false) : (uint256(a - b), true);
-        return string.concat(
-            neg ? "-" : "+", vm.toString(d / POINT), ".", _pad2(d % POINT / 100)
-        );
+        return string.concat(neg ? "-" : "+", vm.toString(d / POINT), ".", _pad2(d % POINT / 100));
     }
 
     function _bps(uint16 v) internal pure returns (string memory) {

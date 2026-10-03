@@ -27,27 +27,27 @@ contract PredictionHookHelper is IUnlockCallback, ReentrancyGuard {
     using BalanceDeltaLibrary for BalanceDelta;
 
     // Price limits for V4 swaps — use full range to never hit price limit.
-    uint160 private constant MIN_SQRT_PRICE_LIMIT = 4295128740;           // MIN_SQRT_PRICE + 1
+    uint160 private constant MIN_SQRT_PRICE_LIMIT = 4295128740; // MIN_SQRT_PRICE + 1
     uint160 private constant MAX_SQRT_PRICE_LIMIT = 1461446703485210103287273052203988822378723970341; // MAX_SQRT_PRICE - 1
 
-    IPoolManager  public immutable poolManager;
+    IPoolManager public immutable poolManager;
     PredictionHook public immutable hook;
-    IERC20         public immutable usdc;
+    IERC20 public immutable usdc;
 
     struct CallbackData {
         address user;
         uint256 marketId;
-        bool    buyYesOut;  // true = swap NO→YES, false = swap YES→NO
-        uint256 amountIn;   // amount of NO (or YES) to swap
+        bool buyYesOut; // true = swap NO→YES, false = swap YES→NO
+        uint256 amountIn; // amount of NO (or YES) to swap
     }
 
     error InsufficientOutput();
     error NotPoolManager();
 
     constructor(IPoolManager _poolManager, PredictionHook _hook, IERC20 _usdc) {
-        poolManager  = _poolManager;
-        hook         = _hook;
-        usdc         = _usdc;
+        poolManager = _poolManager;
+        hook = _hook;
+        usdc = _usdc;
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -60,7 +60,8 @@ contract PredictionHookHelper is IUnlockCallback, ReentrancyGuard {
     /// @param minYesOut   Minimum total YES tokens to receive (slippage guard).
     /// @return yesOut     Total YES tokens sent to caller.
     function buyYes(uint256 marketId, uint256 usdcAmount, uint256 minYesOut)
-        external nonReentrant
+        external
+        nonReentrant
         returns (uint256 yesOut)
     {
         usdc.safeTransferFrom(msg.sender, address(this), usdcAmount);
@@ -88,7 +89,8 @@ contract PredictionHookHelper is IUnlockCallback, ReentrancyGuard {
     /// @param minNoOut    Minimum total NO tokens to receive (slippage guard).
     /// @return noOut      Total NO tokens sent to caller.
     function buyNo(uint256 marketId, uint256 usdcAmount, uint256 minNoOut)
-        external nonReentrant
+        external
+        nonReentrant
         returns (uint256 noOut)
     {
         usdc.safeTransferFrom(msg.sender, address(this), usdcAmount);
@@ -122,12 +124,12 @@ contract PredictionHookHelper is IUnlockCallback, ReentrancyGuard {
         (, address noToken,) = hook.getMarketTokens(d.marketId);
 
         // Determine swap direction: zeroForOne means we sell currency0.
-        bool noIsZero   = Currency.unwrap(key.currency0) == noToken;
+        bool noIsZero = Currency.unwrap(key.currency0) == noToken;
         bool zeroForOne = d.buyYesOut ? noIsZero : !noIsZero; // buyYes = sell NO; buyNo = sell YES
 
         IPoolManager.SwapParams memory params = IPoolManager.SwapParams({
-            zeroForOne:        zeroForOne,
-            amountSpecified:   int256(d.amountIn), // positive = exactInput
+            zeroForOne: zeroForOne,
+            amountSpecified: int256(d.amountIn), // positive = exactInput
             sqrtPriceLimitX96: zeroForOne ? MIN_SQRT_PRICE_LIMIT : MAX_SQRT_PRICE_LIMIT
         });
 
@@ -148,12 +150,8 @@ contract PredictionHookHelper is IUnlockCallback, ReentrancyGuard {
     //////////////////////////////////////////////////////////////*/
 
     function _doSwap(uint256 marketId, uint256 amountIn, bool buyYesOut) internal {
-        CallbackData memory d = CallbackData({
-            user:       msg.sender,
-            marketId:   marketId,
-            buyYesOut:  buyYesOut,
-            amountIn:   amountIn
-        });
+        CallbackData memory d =
+            CallbackData({user: msg.sender, marketId: marketId, buyYesOut: buyYesOut, amountIn: amountIn});
         poolManager.unlock(abi.encode(d));
     }
 

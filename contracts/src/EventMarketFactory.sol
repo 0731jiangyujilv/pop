@@ -21,9 +21,9 @@ contract EventMarketFactory is Ownable {
     address public usdc;
     address public platform;
 
-    uint256 public lpSwapFeeBps = 100;     // 1%
-    uint256 public platformFeeBps = 70;    // 0.7% of totalCollateral at settle
-    uint256 public creatorFeeBps = 30;     // 0.3% of totalCollateral at settle
+    uint256 public lpSwapFeeBps = 100; // 1%
+    uint256 public platformFeeBps = 70; // 0.7% of totalCollateral at settle
+    uint256 public creatorFeeBps = 30; // 0.3% of totalCollateral at settle
 
     uint256 public nextMarketId;
     mapping(uint256 => address) public markets;
@@ -74,11 +74,7 @@ contract EventMarketFactory is Ownable {
     ///         and bootstrap (half LP + half buy in the chosen direction).
     /// @dev    Caller must `approve` the factory for `initLiquidity` USDC first.
     ///         msg.sender is the creator; factory owner is the admin/resolver.
-    function createMarket(CreateParams calldata p)
-        external
-        onlyOwner
-        returns (uint256 marketId, address market)
-    {
+    function createMarket(CreateParams calldata p) external onlyOwner returns (uint256 marketId, address market) {
         if (usdc == address(0)) revert UsdcNotSet();
         if (platform == address(0)) revert PlatformNotSet();
         if (p.initLiquidity == 0) revert ZeroAmount();
@@ -138,10 +134,7 @@ contract EventMarketFactory is Ownable {
 
     /// @dev EventMarket re-validates fees on each deploy; this just changes the
     ///      defaults used for future deployments.
-    function setFees(uint256 _lpSwapFeeBps, uint256 _platformFeeBps, uint256 _creatorFeeBps)
-        external
-        onlyOwner
-    {
+    function setFees(uint256 _lpSwapFeeBps, uint256 _platformFeeBps, uint256 _creatorFeeBps) external onlyOwner {
         lpSwapFeeBps = _lpSwapFeeBps;
         platformFeeBps = _platformFeeBps;
         creatorFeeBps = _creatorFeeBps;

@@ -23,10 +23,10 @@ contract EventMarketTest is Test {
 
     address owner = makeAddr("owner"); // factory owner = admin
     address platform = makeAddr("platform");
-    address creator;                   // = owner (factory.createMarket is onlyOwner)
+    address creator; // = owner (factory.createMarket is onlyOwner)
     address alice = makeAddr("alice"); // buys YES
-    address bob = makeAddr("bob");     // buys NO
-    address lp1 = makeAddr("lp1");     // adds liquidity later
+    address bob = makeAddr("bob"); // buys NO
+    address lp1 = makeAddr("lp1"); // adds liquidity later
 
     /*//////////////////////////////////////////////////////////////
                               CONSTANTS
@@ -592,9 +592,7 @@ contract EventMarketTest is Test {
 
         uint256 yesShare = market.yesReserve() * market.lpShares(creator) / market.totalLpShares();
         uint256 noShare = market.noReserve() * market.lpShares(creator) / market.totalLpShares();
-        uint256 expected =
-            yesShare * market.netUsdcPerYesToken() / ONE
-                + noShare * market.netUsdcPerNoToken() / ONE;
+        uint256 expected = yesShare * market.netUsdcPerYesToken() / ONE + noShare * market.netUsdcPerNoToken() / ONE;
 
         uint256 before = usdc.balanceOf(creator);
         vm.prank(creator);
@@ -932,8 +930,7 @@ contract EventMarketTest is Test {
         market.buyNo(15e6, 0);
         vm.stopPrank();
 
-        (IEventMarket.MarketInfo memory info, IEventMarket.UserState memory pos) =
-            market.getUserState(alice);
+        (IEventMarket.MarketInfo memory info, IEventMarket.UserState memory pos) = market.getUserState(alice);
 
         // Market-global fields mirror getMarketInfo().
         IEventMarket.MarketInfo memory mi = market.getMarketInfo();
@@ -1085,16 +1082,8 @@ contract EventMarketTest is Test {
         market.resolve(true, "");
 
         IEventMarket.Stats memory afterResolve = market.getStats();
-        assertEq(
-            afterResolve.platformFee,
-            collateralAtResolve * market.platformFeeBps() / BPS,
-            "platformFee recorded"
-        );
-        assertEq(
-            afterResolve.creatorFee,
-            collateralAtResolve * market.creatorFeeBps() / BPS,
-            "creatorFee recorded"
-        );
+        assertEq(afterResolve.platformFee, collateralAtResolve * market.platformFeeBps() / BPS, "platformFee recorded");
+        assertEq(afterResolve.creatorFee, collateralAtResolve * market.creatorFeeBps() / BPS, "creatorFee recorded");
 
         uint256 aliceBefore = usdc.balanceOf(alice);
         vm.prank(alice);
@@ -1151,11 +1140,7 @@ contract EventMarketTest is Test {
 
     /// @dev Every cumulative field must be >= its previous reading, and the
     ///      derived totals the backend computes must agree with the parts.
-    function _assertStatsGrew(IEventMarket.Stats memory prev)
-        internal
-        view
-        returns (IEventMarket.Stats memory next)
-    {
+    function _assertStatsGrew(IEventMarket.Stats memory prev) internal view returns (IEventMarket.Stats memory next) {
         next = market.getStats();
 
         assertGe(next.buyYesVolume, prev.buyYesVolume, "buyYesVolume shrank");

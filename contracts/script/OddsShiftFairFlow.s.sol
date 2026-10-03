@@ -114,9 +114,7 @@ contract OddsShiftFairFlow is OddsShiftFlowBase {
                 ")"
             )
         );
-        console.log(
-            string.concat("  1 counter-buy back to ", _pct(p0), " -> reverts the shock at once")
-        );
+        console.log(string.concat("  1 counter-buy back to ", _pct(p0), " -> reverts the shock at once"));
         console.log(
             string.concat(
                 "  ",
@@ -140,10 +138,7 @@ contract OddsShiftFairFlow is OddsShiftFlowBase {
     ///      was small.
     function _climb(uint32 lookback) internal {
         for (uint256 j = 1; j <= lookback; ++j) {
-            _tradeTo(
-                p0 + uint64(uint256(over) * j / lookback),
-                j == lookback ? "<- MARK: the window trips here" : ""
-            );
+            _tradeTo(p0 + uint64(uint256(over) * j / lookback), j == lookback ? "<- MARK: the window trips here" : "");
         }
     }
 
@@ -174,10 +169,7 @@ contract OddsShiftFairFlow is OddsShiftFlowBase {
 
         require(after_.totalShocks == before.totalShocks + 1, "expected exactly one new shock");
         IEventMarketV2.Shock memory s = m.getShocks(after_.totalShocks - 1, 1)[0];
-        require(
-            s.outcome == uint8(IEventMarketV2.ShockOutcome.Reverted),
-            "shock did not revert - check the pool depth"
-        );
+        require(s.outcome == uint8(IEventMarketV2.ShockOutcome.Reverted), "shock did not revert - check the pool depth");
         require(after_.cumChargedFee == before.cumChargedFee, "something was charged");
         require(after_.cumRebated > before.cumRebated, "nothing was refunded");
 
@@ -196,9 +188,7 @@ contract OddsShiftFairFlow is OddsShiftFlowBase {
             )
         );
         console.log(
-            string.concat(
-                "  refunded this run: ", _amt(after_.cumRebated - before.cumRebated), "   charged: 0"
-            )
+            string.concat("  refunded this run: ", _amt(after_.cumRebated - before.cumRebated), "   charged: 0")
         );
         console.log("");
     }

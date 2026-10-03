@@ -97,9 +97,7 @@ contract OddsShiftFlowScriptsTest is Test {
 
         IEventMarketV2.OddsShiftInfo memory i = market.getOddsShiftInfo();
         assertEq(i.totalShocks, 1, "exactly one shock");
-        assertEq(
-            _shock(0).outcome, uint8(IEventMarketV2.ShockOutcome.Reverted), "the shock reverted"
-        );
+        assertEq(_shock(0).outcome, uint8(IEventMarketV2.ShockOutcome.Reverted), "the shock reverted");
         assertEq(i.cumChargedFee, 0, "nothing may be charged in the fair flow");
 
         // #0..#4 are the window the corrector rescued.
@@ -131,10 +129,7 @@ contract OddsShiftFlowScriptsTest is Test {
         assertEq(i.pendingEscrow, 0, "no escrow may be left holding");
         assertEq(i.cumChargedFee, 0, "the fair flow never charges");
         for (uint256 id = 0; id < i.totalTrades; ++id) {
-            assertTrue(
-                this.outcomeOf(id) != uint8(IEventMarketV2.TradeOutcome.Charged),
-                "no trade may be charged"
-            );
+            assertTrue(this.outcomeOf(id) != uint8(IEventMarketV2.TradeOutcome.Charged), "no trade may be charged");
         }
     }
 
@@ -201,11 +196,7 @@ contract OddsShiftFlowScriptsTest is Test {
         assertEq(i.pendingCount, 0, "the queue should be drained");
         assertEq(i.pendingEscrow, 0, "no escrow may be left holding");
         assertEq(i.cumRebated, 0, "still nothing refunded");
-        assertEq(
-            _shock(1).outcome,
-            uint8(IEventMarketV2.ShockOutcome.Toxic),
-            "the second window is toxic too"
-        );
+        assertEq(_shock(1).outcome, uint8(IEventMarketV2.ShockOutcome.Toxic), "the second window is toxic too");
         for (uint256 id = 0; id < i.totalTrades; ++id) {
             _assertOutcome(id, IEventMarketV2.TradeOutcome.Charged, "every trade is a cause");
         }
@@ -265,11 +256,7 @@ contract OddsShiftFlowScriptsTest is Test {
 
         _fair().run();
 
-        assertEq(
-            _shock(0).outcome,
-            uint8(IEventMarketV2.ShockOutcome.Reverted),
-            "the same story at 18 decimals"
-        );
+        assertEq(_shock(0).outcome, uint8(IEventMarketV2.ShockOutcome.Reverted), "the same story at 18 decimals");
         assertEq(market.getOddsShiftInfo().cumChargedFee, 0, "nothing charged");
     }
 
@@ -295,10 +282,7 @@ contract OddsShiftFlowScriptsTest is Test {
         return market.getTrades(id, 1)[0].escrow;
     }
 
-    function _assertOutcome(uint256 id, IEventMarketV2.TradeOutcome want, string memory why)
-        internal
-        view
-    {
+    function _assertOutcome(uint256 id, IEventMarketV2.TradeOutcome want, string memory why) internal view {
         assertEq(this.outcomeOf(id), uint8(want), why);
     }
 
@@ -311,11 +295,7 @@ contract OddsShiftFlowScriptsTest is Test {
         );
     }
 
-    function _escrowedTotal(IEventMarketV2.OddsShiftInfo memory i)
-        internal
-        view
-        returns (uint256 total)
-    {
+    function _escrowedTotal(IEventMarketV2.OddsShiftInfo memory i) internal view returns (uint256 total) {
         for (uint256 id = 0; id < i.totalTrades; ++id) {
             total += this.escrowOf(id);
         }

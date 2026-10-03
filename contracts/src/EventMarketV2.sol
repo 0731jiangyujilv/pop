@@ -238,8 +238,7 @@ contract EventMarketV2 is IEventMarketV2, ReentrancyGuard {
         if (p.lpSwapFeeBps > MAX_LP_SWAP_FEE_BPS) revert FeeTooHigh();
         if (p.platformFeeBps + p.creatorFeeBps > MAX_PROTOCOL_FEE_BPS) revert FeeTooHigh();
         if (p.bettingDeadline <= block.timestamp) revert InvalidDeadline();
-        uint256 resolveAfter_ =
-            p.resolveAfter == 0 ? p.bettingDeadline + DEFAULT_RESOLVE_WINDOW : p.resolveAfter;
+        uint256 resolveAfter_ = p.resolveAfter == 0 ? p.bettingDeadline + DEFAULT_RESOLVE_WINDOW : p.resolveAfter;
         if (resolveAfter_ < p.bettingDeadline) revert InvalidResolveTime();
 
         // A zero protection fee would leave nothing to judge.
@@ -316,10 +315,7 @@ contract EventMarketV2 is IEventMarketV2, ReentrancyGuard {
 
     /// @dev Symmetric injection: the same USDC enters both reserves. No trade fee
     ///      is charged — liquidity provision is not directional flow.
-    function _addLiquidity(address provider, uint256 usdcAmount, bool lockShares)
-        internal
-        returns (uint256 shares)
-    {
+    function _addLiquidity(address provider, uint256 usdcAmount, bool lockShares) internal returns (uint256 shares) {
         if (usdcAmount == 0) revert ZeroAmount();
 
         _harvest(provider);
@@ -395,11 +391,7 @@ contract EventMarketV2 is IEventMarketV2, ReentrancyGuard {
     /// @notice Buy YES. `usdcAmount` is the TOTAL pulled from the caller; the
     ///         base fee and the protection fee come off the top and the rest
     ///         enters the curve. Use {quoteYes} for the resulting token amount.
-    function buyYes(uint256 usdcAmount, uint256 minYesOut)
-        external
-        nonReentrant
-        returns (uint256 yesOut)
-    {
+    function buyYes(uint256 usdcAmount, uint256 minYesOut) external nonReentrant returns (uint256 yesOut) {
         _maybeLock();
         if (status != Status.Open) revert WrongStatus();
         if (usdcAmount == 0) revert ZeroAmount();
@@ -418,11 +410,7 @@ contract EventMarketV2 is IEventMarketV2, ReentrancyGuard {
         emit BoughtYes(msg.sender, usdcAmount, yesOut);
     }
 
-    function buyNo(uint256 usdcAmount, uint256 minNoOut)
-        external
-        nonReentrant
-        returns (uint256 noOut)
-    {
+    function buyNo(uint256 usdcAmount, uint256 minNoOut) external nonReentrant returns (uint256 noOut) {
         _maybeLock();
         if (status != Status.Open) revert WrongStatus();
         if (usdcAmount == 0) revert ZeroAmount();
@@ -480,11 +468,7 @@ contract EventMarketV2 is IEventMarketV2, ReentrancyGuard {
     /// @notice Sell YES back to USDC. Both fee slices come off the gross
     ///         proceeds; `minUsdcOut` is checked against the NET the caller
     ///         actually receives. Use {quoteSellYes}.
-    function sellYes(uint256 yesAmount, uint256 minUsdcOut)
-        external
-        nonReentrant
-        returns (uint256 usdcOut)
-    {
+    function sellYes(uint256 yesAmount, uint256 minUsdcOut) external nonReentrant returns (uint256 usdcOut) {
         _maybeLock();
         if (status != Status.Open) revert WrongStatus();
 
@@ -504,11 +488,7 @@ contract EventMarketV2 is IEventMarketV2, ReentrancyGuard {
         emit SoldYes(msg.sender, yesAmount, usdcOut);
     }
 
-    function sellNo(uint256 noAmount, uint256 minUsdcOut)
-        external
-        nonReentrant
-        returns (uint256 usdcOut)
-    {
+    function sellNo(uint256 noAmount, uint256 minUsdcOut) external nonReentrant returns (uint256 usdcOut) {
         _maybeLock();
         if (status != Status.Open) revert WrongStatus();
 
@@ -591,9 +571,7 @@ contract EventMarketV2 is IEventMarketV2, ReentrancyGuard {
     ///      probability history, then let the window machine run. Every buy and
     ///      sell appends a trade, zero-escrow dust included — a gap in the
     ///      history would silently corrupt the next window's anchor.
-    function _afterTrade(address trader, uint256 baseFee, uint256 escrow, uint64 pBefore)
-        internal
-    {
+    function _afterTrade(address trader, uint256 baseFee, uint256 escrow, uint64 pBefore) internal {
         if (baseFee > 0) {
             cumBaseFee += baseFee;
             _payLps(trader, baseFee);
@@ -739,17 +717,11 @@ contract EventMarketV2 is IEventMarketV2, ReentrancyGuard {
         Trade storage t = trades[id];
         int256 impact = int256(uint256(t.pAfter)) - int256(uint256(t.pBefore));
         if (dir < 0) impact = -impact;
-        return
-            impact > int256(uint256(contribThreshold))
-            ? TradeOutcome.Charged
-            : TradeOutcome.RefundedMinor;
+        return impact > int256(uint256(contribThreshold)) ? TradeOutcome.Charged : TradeOutcome.RefundedMinor;
     }
 
     /// @param shockId Meaningful only when `o` is not {RefundedNoShock}.
-    function _finalize(uint256 id, TradeOutcome o, uint256 shockId)
-        internal
-        returns (uint256 amt)
-    {
+    function _finalize(uint256 id, TradeOutcome o, uint256 shockId) internal returns (uint256 amt) {
         Trade storage t = trades[id];
         amt = t.escrow;
         t.outcome = uint8(o);
@@ -920,10 +892,7 @@ contract EventMarketV2 is IEventMarketV2, ReentrancyGuard {
                             LIFECYCLE / SETTLE
     //////////////////////////////////////////////////////////////*/
 
-    function setMetadata(string calldata question_, string calldata resolutionSource_)
-        external
-        onlyAdmin
-    {
+    function setMetadata(string calldata question_, string calldata resolutionSource_) external onlyAdmin {
         if (status == Status.Settled) revert WrongStatus();
         question = question_;
         resolutionSource = resolutionSource_;
@@ -1151,11 +1120,7 @@ contract EventMarketV2 is IEventMarketV2, ReentrancyGuard {
         stats = _stats;
     }
 
-    function getUserState(address u)
-        external
-        view
-        returns (MarketInfo memory info, UserState memory pos)
-    {
+    function getUserState(address u) external view returns (MarketInfo memory info, UserState memory pos) {
         info = _marketInfo();
         pos = UserState({
             yesBalance: yesBalanceOf[u],
@@ -1312,31 +1277,19 @@ contract EventMarketV2 is IEventMarketV2, ReentrancyGuard {
         yesReserve += yesIn;
     }
 
-    function _calcNoForYes(uint256 noIn, uint256 yesRes, uint256 noRes)
-        internal
-        view
-        returns (uint256)
-    {
+    function _calcNoForYes(uint256 noIn, uint256 yesRes, uint256 noRes) internal view returns (uint256) {
         if (yesRes == 0 || noRes == 0) return 0;
         uint256 effectiveIn = noIn * (BPS - lpSwapFeeBps) / BPS;
         return yesRes * effectiveIn / (noRes + effectiveIn);
     }
 
-    function _calcYesForNo(uint256 yesIn, uint256 yesRes, uint256 noRes)
-        internal
-        view
-        returns (uint256)
-    {
+    function _calcYesForNo(uint256 yesIn, uint256 yesRes, uint256 noRes) internal view returns (uint256) {
         if (yesRes == 0 || noRes == 0) return 0;
         uint256 effectiveIn = yesIn * (BPS - lpSwapFeeBps) / BPS;
         return noRes * effectiveIn / (yesRes + effectiveIn);
     }
 
-    function _solveExitSwap(uint256 amount, uint256 reserveIn, uint256 reserveOut)
-        internal
-        view
-        returns (uint256 s)
-    {
+    function _solveExitSwap(uint256 amount, uint256 reserveIn, uint256 reserveOut) internal view returns (uint256 s) {
         uint256 phi = BPS - lpSwapFeeBps;
         uint256 ab = reserveIn * BPS + reserveOut * phi;
         uint256 c = amount * phi;
