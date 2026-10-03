@@ -6,9 +6,13 @@ import {
   ROBINHOOD_CHAIN_SLUG_ALIAS,
   ROBINHOOD_EXPLORER_URL,
   ROBINHOOD_RPC_URL,
+  addressExplorerUrl,
   getRobinhoodChainIdBySlug,
+  isWalletOnWrongChain,
+  resolveRobinhoodMarketAddress,
   resolveRobinhoodRpcUrl,
   robinhoodTestnet,
+  shouldShowTokenFaucet,
   validatedAddress,
 } from '../src/config/robinhood.ts'
 
@@ -39,4 +43,30 @@ test('production address validation rejects missing, malformed, and zero values'
     validatedAddress('0x7E955252E15c84f5768B83c41a71F9eba181802F'),
     '0x7E955252E15c84f5768B83c41a71F9eba181802F',
   )
+})
+
+test('Robinhood market resolution never falls back from an explicit invalid address', () => {
+  const configured = '0x1111111111111111111111111111111111111111'
+  const explicit = '0x2222222222222222222222222222222222222222'
+  assert.equal(resolveRobinhoodMarketAddress(undefined, configured), configured)
+  assert.equal(resolveRobinhoodMarketAddress(explicit, configured), explicit)
+  assert.equal(resolveRobinhoodMarketAddress('0x1234', configured), undefined)
+  assert.equal(resolveRobinhoodMarketAddress(undefined, undefined), undefined)
+})
+
+test('wrong-chain detection and explorer links are deterministic', () => {
+  const address = '0x2222222222222222222222222222222222222222'
+  assert.equal(isWalletOnWrongChain(false, 1, ROBINHOOD_CHAIN_ID), false)
+  assert.equal(isWalletOnWrongChain(true, 1, ROBINHOOD_CHAIN_ID), true)
+  assert.equal(isWalletOnWrongChain(true, ROBINHOOD_CHAIN_ID, ROBINHOOD_CHAIN_ID), false)
+  assert.equal(
+    addressExplorerUrl(`${ROBINHOOD_EXPLORER_URL}/`, address),
+    `${ROBINHOOD_EXPLORER_URL}/address/${address}`,
+  )
+})
+
+test('real USDG routes never expose the mock-token faucet', () => {
+  const usdg = '0x7E955252E15c84f5768B83c41a71F9eba181802F'
+  assert.equal(shouldShowTokenFaucet(false, true, usdg), false)
+  assert.equal(shouldShowTokenFaucet(true, true, usdg), true)
 })
