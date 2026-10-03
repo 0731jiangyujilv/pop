@@ -1,7 +1,8 @@
-import { createContext, useCallback, useEffect, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { useAccount, useChainId, useSignMessage } from 'wagmi'
 import { BOT_API_URL, getAuthToken, setAuthToken, clearAuthToken } from '@/lib/api'
 import { isSupportedChain } from '@/config/chains'
+import { AuthContext } from '@/contexts/authState'
 
 // Build an EIP-4361 (SIWE) message string directly. We intentionally do NOT use
 // siwe's `SiweMessage` in the browser: its v3 constructor validates via
@@ -31,24 +32,6 @@ function buildSiweMessage(params: {
   const prefix = `${[`${header}\n${params.address}`, params.statement].join('\n\n')}\n`
   return `${prefix}\n${suffix}`
 }
-
-export type AuthState = {
-  isAuthenticated: boolean
-  isSigningIn: boolean
-  address: string | null
-  chainId: number | null
-  signIn: () => Promise<void>
-  signOut: () => void
-}
-
-export const AuthContext = createContext<AuthState>({
-  isAuthenticated: false,
-  isSigningIn: false,
-  address: null,
-  chainId: null,
-  signIn: async () => {},
-  signOut: () => {},
-})
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { address, isConnected } = useAccount()
