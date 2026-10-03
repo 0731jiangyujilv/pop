@@ -50,6 +50,8 @@ contract DeployEventMarketV2 is Script {
         // seventeen-field `new` blows the IR stack.
         EventMarketV2.Params memory p = _params(deployer);
 
+        _preflight(deployer, p, initLiquidity);
+
         vm.startBroadcast(pk);
 
         EventMarketV2 m = new EventMarketV2(p);
@@ -73,14 +75,14 @@ contract DeployEventMarketV2 is Script {
         console.log("  observeWindow      :", p.observeWindow);
         console.log("  cooldown           :", p.cooldown);
         console.log("");
-        console.log("Open the demo at /oddsshift/%s", market);
+        console.log("Open the demo at", string.concat(_demoBasePath(), vm.toString(market)));
     }
 
     /// @dev `deployer` takes both the admin and the creator role, and — because
     ///      there is no factory — the factory role too, by virtue of being the
     ///      address that runs `new`.
-    function _params(address deployer) internal view returns (EventMarketV2.Params memory p) {
-        p.usdc = vm.envAddress("USDC_ADDRESS");
+    function _params(address deployer) internal view virtual returns (EventMarketV2.Params memory p) {
+        p.usdc = _collateralToken();
         p.admin = deployer; // resolves the market
         p.creator = deployer; // takes the creator fee and the seed LP shares
         p.platform = vm.envAddress("FEE_RECIPIENT");
@@ -98,5 +100,15 @@ contract DeployEventMarketV2 is Script {
         p.lookback = uint32(vm.envOr("OS_LOOKBACK", uint256(5)));
         p.observeWindow = uint32(vm.envOr("OS_OBSERVE_WINDOW", uint256(5)));
         p.cooldown = uint32(vm.envOr("OS_COOLDOWN", uint256(120)));
+    }
+
+    function _collateralToken() internal view virtual returns (address) {
+        return vm.envAddress("USDC_ADDRESS");
+    }
+
+    function _preflight(address, EventMarketV2.Params memory, uint256) internal view virtual {}
+
+    function _demoBasePath() internal pure virtual returns (string memory) {
+        return "/oddsshift/";
     }
 }

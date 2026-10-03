@@ -25,6 +25,7 @@ import {IEventMarket} from "./IEventMarket.sol";
 ///
 /// {resolveStale} is the permissionless time fallback for a quiet market.
 interface IEventMarketV2 is IEventMarket {
+    error ZeroCollateralToken();
     /*//////////////////////////////////////////////////////////////
                                  TYPES
     //////////////////////////////////////////////////////////////*/

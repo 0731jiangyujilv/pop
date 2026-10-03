@@ -234,6 +234,7 @@ contract EventMarketV2 is IEventMarketV2, ReentrancyGuard {
     }
 
     constructor(Params memory p) {
+        if (p.usdc == address(0)) revert ZeroCollateralToken();
         if (p.lpSwapFeeBps > MAX_LP_SWAP_FEE_BPS) revert FeeTooHigh();
         if (p.platformFeeBps + p.creatorFeeBps > MAX_PROTOCOL_FEE_BPS) revert FeeTooHigh();
         if (p.bettingDeadline <= block.timestamp) revert InvalidDeadline();
