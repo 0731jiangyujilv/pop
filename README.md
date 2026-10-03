@@ -4,6 +4,63 @@ POP Protocol is a prediction-market platform for creating, trading, and resolvin
 
 This repository contains the core platform logic and the surrounding tooling used to operate it in a multi-chain environment.
 
+## Judge validation (October 4 submission)
+
+A fresh clone can reproduce the active release gate from the repository root. The same commands are what CI runs. They do **not** deploy, broadcast, verify a contract, publish the frontend, or imply that Robinhood/USDG production deployment has occurred.
+
+```bash
+./scripts/validate-release.sh
+```
+
+The script fails immediately on the first failed check. Equivalently, run the steps below by hand.
+
+### 1. Active / default Foundry suite
+
+From `contracts/`:
+
+```bash
+forge fmt --check
+forge build
+forge test -vvv
+```
+
+This is the only executable Solidity suite. It currently covers EventMarket V1, EventMarketV2, Robinhood deployment preflight, the Robinhood deploy script, and OddsShift flow scripts. Default `forge test -vvv` must report zero failures and zero skipped tests.
+
+### 2. Preserved historical legacy tests
+
+Seven removed-module suites live under `contracts/legacy-tests/` and are documented in `contracts/legacy-tests/README.md` and `docs/FOUNDRY_TEST_BASELINE.md`. They are **not** part of the default suite and **do not pass**: the production contracts they import were removed before this release gate. Do not treat them as green coverage.
+
+### 3. Security / static analysis
+
+```bash
+./scripts/slither-focused.sh
+```
+
+The focused scan covers `EventMarketV2`, `RobinhoodDeploymentPreflight`, and `DeployRobinhoodEventMarketV2`. Triage, including accepted rounding and false-positive detectors, is in `docs/EVENT_MARKET_V2_SECURITY_TRIAGE.md`.
+
+### 4. Frontend validation
+
+From `webapp/`:
+
+```bash
+pnpm install --frozen-lockfile
+pnpm exec tsc -b --pretty false
+pnpm run lint:active
+pnpm build
+pnpm audit --prod
+```
+
+`pnpm lint` is the full-repository ESLint command. Historical pages that are not reachable from `/robinhood` can fail it. The release gate uses `pnpm run lint:active`, which lints the `/robinhood` import graph: `src/main.tsx`, shared shell modules, the OddsShift page, every file those modules import, Robinhood configuration, and `test/robinhood-config.test.ts`.
+
+### 5. Robinhood configuration validation
+
+```bash
+cd webapp
+pnpm test
+```
+
+These tests pin Robinhood Chain Testnet metadata and reject an invalid or zero market address. They do not talk to a live chain.
+
 ## Overview
 
 The system is built around the idea of turning real-world questions into live, onchain markets:
