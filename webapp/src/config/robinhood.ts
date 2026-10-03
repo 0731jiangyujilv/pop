@@ -32,6 +32,13 @@ export function validatedAddress(value: string | null | undefined): Address | un
   return candidate as Address
 }
 
+export function resolveRobinhoodMarketAddress(
+  explicitAddress: string | null | undefined,
+  configuredAddress: string | null | undefined,
+): Address | undefined {
+  return validatedAddress(explicitAddress ?? configuredAddress)
+}
+
 export function resolveRobinhoodRpcUrl(override: string | null | undefined): string {
   const candidate = override?.trim()
   if (!candidate) return ROBINHOOD_RPC_URL
@@ -48,4 +55,24 @@ export function getRobinhoodChainIdBySlug(slug: string | null | undefined): numb
   return slug === ROBINHOOD_CHAIN_SLUG || slug === ROBINHOOD_CHAIN_SLUG_ALIAS
     ? ROBINHOOD_CHAIN_ID
     : undefined
+}
+
+export function isWalletOnWrongChain(
+  isConnected: boolean,
+  walletChainId: number,
+  requiredChainId: number,
+): boolean {
+  return isConnected && walletChainId !== requiredChainId
+}
+
+export function addressExplorerUrl(explorerUrl: string, address: Address): string {
+  return `${explorerUrl.replace(/\/$/, '')}/address/${address}`
+}
+
+export function shouldShowTokenFaucet(
+  faucetEnabled: boolean,
+  isConnected: boolean,
+  tokenAddress: Address | undefined,
+): boolean {
+  return faucetEnabled && isConnected && Boolean(tokenAddress)
 }

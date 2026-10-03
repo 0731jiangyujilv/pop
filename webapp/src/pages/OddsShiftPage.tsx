@@ -1,11 +1,17 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useAccount, useChainId, usePublicClient, useReadContracts, useSwitchChain } from 'wagmi'
-import { formatUnits, parseUnits } from 'viem'
+import { formatUnits, parseUnits, type Address, type Chain } from 'viem'
 import { SiteNav } from '@/components/SiteNav'
 import { TxToast } from '@/components/TxToast'
 // import { InfoTooltip } from '@/components/InfoTooltip'
 import { arcTestnet, getChainConfig } from '@/config/chains'
+import {
+  addressExplorerUrl,
+  isWalletOnWrongChain,
+  resolveRobinhoodMarketAddress,
+  shouldShowTokenFaucet,
+} from '@/config/robinhood'
 import {
   EVENT_MARKET_V2_ABI,
   PROB_SCALE,
@@ -57,6 +63,22 @@ type Side = 'YES' | 'NO'
 /** A trade plus its on-chain id — `getTrades(0, …)` returns them in id order. */
 type IdTrade = OddsShiftTrade & { id: number }
 
+export type OddsShiftDeployment = {
+  chain: Chain
+  defaultMarketAddress?: string
+  expectedCollateralAddress?: Address
+  expectedCollateralSymbol?: string
+  faucetEnabled: boolean
+  routeLabel: string
+}
+
+const ARC_ODDS_SHIFT_DEPLOYMENT: OddsShiftDeployment = {
+  chain: arcTestnet,
+  defaultMarketAddress: '0x618689f025C862Fa0D2570ECc0eD5F4b72725d33',
+  faucetEnabled: true,
+  routeLabel: 'Arc OddsShift',
+}
+
 /** How the four terminal verdicts (plus Pending) read in the UI. */
 const OUTCOME_META: Record<number, { label: string; cls: string }> = {
   [TradeOutcome.Pending]: { label: 'escrowed', cls: 'os-badge-neutral' },
@@ -80,22 +102,40 @@ const OUTCOME_META: Record<number, { label: string; cls: string }> = {
  * Visually this follows `EventMarketAmmPage` — the same `popamm` swap card, one
  * column wider so the probability path and the judgement log sit beside it.
  */
-export function OddsShiftPage() {
+export function OddsShiftPage({
+  deployment = ARC_ODDS_SHIFT_DEPLOYMENT,
+}: {
+  deployment?: OddsShiftDeployment
+}) {
   const { contractAddress } = useParams<{ contractAddress: string }>()
-  const marketAddr = (contractAddress ?? '0x618689f025C862Fa0D2570ECc0eD5F4b72725d33') as `0x${string}`
+  const marketAddr = resolveRobinhoodMarketAddress(contractAddress, deployment.defaultMarketAddress)
+
+  if (!marketAddr) {
+    return <OddsShiftUnavailable deployment={deployment} />
+  }
+
+  return <OddsShiftMarketPage deployment={deployment} marketAddr={marketAddr} />
+}
+
+function OddsShiftMarketPage({
+  deployment,
+  marketAddr,
+}: {
+  deployment: OddsShiftDeployment
+  marketAddr: Address
+}) {
   const { address, isConnected } = useAccount()
-  // This page is Arc-only: the OddsShift V2 market is deployed on Arc Testnet and
-  // nowhere else, so reads AND writes are pinned there instead of following the
-  // wallet. Without the pin, `useChainId()` hands back the first chain in the
-  // wagmi config (base-sepolia) whenever the wallet is disconnected, and every
-  // read on this page went to https://sepolia.base.org.
-  const chainId = arcTestnet.id
+  // Reads and writes are pinned by route configuration instead of following the
+  // connected wallet. A disconnected wallet must never redirect reads to the
+  // first Wagmi chain, and Robinhood must never fall back to Arc.
+  const { chain } = deployment
+  const chainId = chain.id
   const walletChainId = useChainId()
-  const chainMismatch = isConnected && walletChainId !== chainId
+  const chainMismatch = isWalletOnWrongChain(isConnected, walletChainId, chainId)
   const publicClient = usePublicClient({ chainId })
   const { writeContractAsync } = useWriteContractWithAttribution()
   const { switchChain, isPending: isSwitching } = useSwitchChain()
-  const explorerUrl = getChainConfig(chainId)?.explorerUrl || 'https://testnet.arcscan.app'
+  const explorerUrl = chain.blockExplorers?.default.url ?? getChainConfig(chainId)?.explorerUrl ?? ''
 
   const [side, setSide] = useState<Side>('YES')
   const [amount, setAmount] = useState('30')
@@ -132,7 +172,7 @@ export function OddsShiftPage() {
     query: { enabled: Boolean(marketAddr), refetchInterval: 5000 },
   })
 
-  // const question = marketReads.data?.[0]?.result as string | undefined
+  const question = marketReads.data?.[0]?.result as string | undefined
   const status = marketReads.data?.[1]?.result as number | undefined
   const yesReserve = marketReads.data?.[2]?.result as bigint | undefined
   const noReserve = marketReads.data?.[3]?.result as bigint | undefined
@@ -160,7 +200,15 @@ export function OddsShiftPage() {
     query: { enabled: Boolean(usdcAddr) },
   })
   const decimals = (tokenReads.data?.[0]?.result as number | undefined) ?? 6
-  const symbol = (tokenReads.data?.[1]?.result as string | undefined) ?? 'USDC'
+  const symbol =
+    (tokenReads.data?.[1]?.result as string | undefined) ??
+    deployment.expectedCollateralSymbol ??
+    'USDC'
+  const collateralMismatch = Boolean(
+    deployment.expectedCollateralAddress &&
+      usdcAddr &&
+      usdcAddr.toLowerCase() !== deployment.expectedCollateralAddress.toLowerCase(),
+  )
   const fmt = useCallback<Fmt>((v) => fmtAmount(v, decimals), [decimals])
 
   const userReads = useReadContracts({
@@ -277,10 +325,12 @@ export function OddsShiftPage() {
   const run = useCallback(
     async (label: string, title: string, share: boolean, fn: () => Promise<`0x${string}`>) => {
       if (!publicClient) return
-      // Every write targets the Arc market, so refuse to submit from another
-      // network rather than letting wagmi fail mid-flight on the chain switch.
       if (chainMismatch) {
-        setError(`Switch your wallet to ${arcTestnet.name} to interact with this market.`)
+        setError(`Switch your wallet to ${chain.name} to interact with this market.`)
+        return
+      }
+      if (collateralMismatch) {
+        setError('This market is not configured with the expected collateral token.')
         return
       }
       setError('')
@@ -303,7 +353,7 @@ export function OddsShiftPage() {
         setBusy(null)
       }
     },
-    [publicClient, refetchAll, chainMismatch],
+    [publicClient, refetchAll, chainMismatch, chain.name, collateralMismatch],
   )
 
   async function ensureAllowance(need: bigint) {
@@ -367,29 +417,7 @@ export function OddsShiftPage() {
   const statusLabel =
     status === 0 ? 'Open' : status === 1 ? 'Locked' : status === 2 ? 'Settled' : 'Loading…'
   const tradeAllowed = status === 0
-  /** No write is available while one is in flight or the wallet is off Arc. */
-  const writesBlocked = busy !== null || chainMismatch
-
-  if (!marketAddr) {
-    return (
-      <div className="popamm">
-        <style>{POP_AMM_CSS}</style>
-        <style>{ODDS_SHIFT_CSS}</style>
-        <SiteNav />
-        <main className="pp-wrap">
-          <section className="pp-card">
-            <div className="pp-market">
-              <div className="pp-title">No market in the URL</div>
-              <p className="pp-label" style={{ marginTop: 10, lineHeight: 1.5 }}>
-                Open <code>/oddsshift/&lt;market address&gt;</code> — this page targets a single
-                EventMarketV2 contract straight from the path.
-              </p>
-            </div>
-          </section>
-        </main>
-      </div>
-    )
-  }
+  const writesBlocked = busy !== null || chainMismatch || collateralMismatch
 
   return (
     <div className="popamm">
@@ -399,10 +427,21 @@ export function OddsShiftPage() {
 
       <main className="pp-wrap os-wrap">
         <div className="os-stack">
-          <span className="os-brand">OddsShift</span>
-          <h1 className="pp-hero os-hero">
-            Will Fed cut rates in September 2026?
-          </h1>
+          <span className="os-brand">OddsShift · {deployment.routeLabel}</span>
+          <h1 className="pp-hero os-hero">{question ?? 'Loading market…'}</h1>
+          <div className="pp-review" style={{ marginBottom: 14 }}>
+            <Row label="Network" value={chain.name} />
+            <Row label="Collateral" value={symbol} />
+            <AddressRow label="Market" address={marketAddr} explorerUrl={explorerUrl} />
+            <AddressRow label="Collateral contract" address={usdcAddr} explorerUrl={explorerUrl} />
+            {isConnected && <Row label={`Your ${symbol} balance`} value={`${fmt(usdcBal)} ${symbol}`} />}
+          </div>
+          {collateralMismatch && (
+            <div className="pp-note pp-note-warn" style={{ marginBottom: 14 }}>
+              This market's collateral does not match the official configured USDG address. Writes
+              are disabled.
+            </div>
+          )}
           <p className="os-lede">
             Every buy and sell pays <b>{((baseFeeBps + protectionFeeBps) / 100).toFixed(1)}%</b>:{' '}
             {(baseFeeBps / 100).toFixed(2)}% straight to the LPs and{' '}
@@ -550,7 +589,7 @@ export function OddsShiftPage() {
                 </div>
 
                 <div className="pp-body">
-                  {isConnected && usdcAddr && (
+                  {shouldShowTokenFaucet(deployment.faucetEnabled, isConnected, usdcAddr) && (
                     <div className="pp-claimrow pp-faucetrow" style={{ marginBottom: 10 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                         <span className="pp-coin" />
@@ -682,16 +721,16 @@ export function OddsShiftPage() {
                   ) : chainMismatch ? (
                     <>
                       <div className="pp-note pp-note-warn">
-                        This market only exists on {arcTestnet.name} — your wallet is on{' '}
+                        This market only exists on {chain.name} — your wallet is on{' '}
                         {getChainConfig(walletChainId)?.chain.name || `chain ${walletChainId}`}. The
-                        numbers above are read from Arc either way.
+                        numbers above are read from {chain.name} either way.
                       </div>
                       <button
                         className="pp-cta pp-buy-cta"
-                        onClick={() => switchChain({ chainId: arcTestnet.id })}
+                        onClick={() => switchChain({ chainId })}
                         disabled={isSwitching}
                       >
-                        {isSwitching ? 'Switching…' : `Switch to ${arcTestnet.name}`}
+                        {isSwitching ? 'Switching…' : `Switch to ${chain.name}`}
                       </button>
                     </>
                   ) : (
@@ -716,7 +755,14 @@ export function OddsShiftPage() {
                 )}
 
                 <div className="pp-foot" style={{ marginTop: -4 }}>
-                  <span className="os-addr">{marketAddr}</span>
+                  <a
+                    className="os-addr"
+                    href={addressExplorerUrl(explorerUrl, marketAddr)}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {marketAddr}
+                  </a>
                 </div>
               </section>
 
@@ -794,6 +840,51 @@ export function OddsShiftPage() {
         error={toastError}
         message={error}
       />
+    </div>
+  )
+}
+
+function OddsShiftUnavailable({ deployment }: { deployment: OddsShiftDeployment }) {
+  return (
+    <div className="popamm">
+      <style>{POP_AMM_CSS}</style>
+      <style>{ODDS_SHIFT_CSS}</style>
+      <SiteNav />
+      <main className="pp-wrap">
+        <section className="pp-card">
+          <div className="pp-market">
+            <div className="pp-title">{deployment.routeLabel} market not configured</div>
+            <p className="pp-label" style={{ marginTop: 10, lineHeight: 1.5 }}>
+              No valid, nonzero EventMarketV2 address is configured for {deployment.chain.name}.
+              Use this route again with a valid market address after deployment and verification.
+            </p>
+          </div>
+        </section>
+      </main>
+    </div>
+  )
+}
+
+function AddressRow({
+  label,
+  address,
+  explorerUrl,
+}: {
+  label: string
+  address: Address | undefined
+  explorerUrl: string
+}) {
+  const value = address ?? 'Loading…'
+  return (
+    <div className="pp-review-row">
+      <span>{label}</span>
+      {address && explorerUrl ? (
+        <a href={addressExplorerUrl(explorerUrl, address)} target="_blank" rel="noreferrer">
+          {value}
+        </a>
+      ) : (
+        <span className="os-num">{value}</span>
+      )}
     </div>
   )
 }
