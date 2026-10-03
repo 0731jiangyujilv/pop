@@ -2,9 +2,13 @@
 pragma solidity ^0.8.24;
 
 import {Test} from "forge-std/Test.sol";
+import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {EventMarketV2} from "../src/EventMarketV2.sol";
 import {IEventMarket} from "../src/interfaces/IEventMarket.sol";
 import {IEventMarketV2} from "../src/interfaces/IEventMarketV2.sol";
+import {MisbehavingERC20} from "./mocks/MisbehavingERC20.sol";
 import {MockERC20} from "./mocks/MockERC20.sol";
 
 /// @notice EventMarketV2 — the V1 AMM plus OddsShift window-based LP protection.
@@ -186,7 +190,7 @@ contract EventMarketV2Test is Test {
         uint256 yRate = market.netUsdcPerYesToken();
         uint256 nRate = market.netUsdcPerNoToken();
 
-        owed = market.yesBalanceOf(a) * yRate / ONE + market.noBalanceOf(a) * nRate / ONE;
+        owed = _outcomeClaimOf(a);
 
         uint256 totalShares = market.totalLpShares();
         if (totalShares == 0 || market.lpClaimed(a)) return owed;
@@ -196,6 +200,92 @@ contract EventMarketV2Test is Test {
         uint256 sh = market.lpShares(a);
         owed += (market.yesReserve() * sh / totalShares) * yRate / ONE;
         owed += (market.noReserve() * sh / totalShares) * nRate / ONE;
+    }
+
+    function _outcomeClaimOf(address a) internal view returns (uint256) {
+        return market.yesBalanceOf(a) * market.netUsdcPerYesToken() / ONE
+            + market.noBalanceOf(a) * market.netUsdcPerNoToken() / ONE;
+    }
+
+    /// @dev Upper bound on USDC that can be stranded by flooring once every actor
+    ///      has claimed: each LP credit (one per trade, plus one per charged
+    ///      verdict) can leave < 1 unit in the reward accumulator, and each of the
+    ///      four actors' claims floors < 1 unit per term — two outcome
+    ///      redemptions, four LP-payout floors, and up to four reward harvests.
+    function _dustBound() internal view returns (uint256) {
+        return 2 * _tradeCount() + 4 * (2 + 4 + 4) + 1;
+    }
+
+    /// @param mode 0 = admin resolves YES, 1 = admin resolves NO,
+    ///             2 = permissionless emergency draw.
+    function _settle(uint256 mode) internal {
+        vm.warp(bettingDeadline + 1);
+        market.lock();
+        if (mode == 2) {
+            vm.warp(resolveAfter + market.EMERGENCY_TIMELOCK());
+            market.emergencyForceDraw();
+        } else {
+            vm.warp(resolveAfter);
+            vm.prank(owner);
+            market.resolve(mode == 0, "fixture");
+        }
+    }
+
+    /// @dev Pull every settlement-side claim `a` has.
+    function _drain(address a) internal {
+        uint256 yesBal = market.yesBalanceOf(a);
+        if (yesBal > 0 && market.netUsdcPerYesToken() > 0) {
+            vm.prank(a);
+            market.redeemYes(yesBal);
+        }
+        uint256 noBal = market.noBalanceOf(a);
+        if (noBal > 0 && market.netUsdcPerNoToken() > 0) {
+            vm.prank(a);
+            market.redeemNo(noBal);
+        }
+        if (market.lpShares(a) > 0) {
+            vm.prank(a);
+            market.claimLpPayout();
+        }
+        if (market.rebateClaimable(a) > 0) {
+            vm.prank(a);
+            market.claimRebate();
+        }
+        if (_lpClaimable(a) > 0) {
+            vm.prank(a);
+            market.claimLpReward();
+        }
+    }
+
+    function _addLiquidity(address who, uint256 amount) internal {
+        vm.startPrank(who);
+        usdc.approve(address(market), amount);
+        market.addLiquidity(amount);
+        vm.stopPrank();
+    }
+
+    function _removeHalfLiquidity(address who) internal {
+        uint256 half = market.lpShares(who) / 2;
+        if (half == 0) return;
+        vm.prank(who);
+        market.removeLiquidity(half);
+    }
+
+    function _sellYesFraction(address who, uint256 bps) internal {
+        uint256 amount = market.yesBalanceOf(who) * bps / BPS;
+        if (amount == 0) return;
+        vm.prank(who);
+        market.sellYes(amount, 0);
+    }
+
+    /// @dev Swap the fixture collateral for a token that can fail or re-enter.
+    function _useMisbehavingToken() internal returns (MisbehavingERC20 bad) {
+        bad = new MisbehavingERC20();
+        usdc = bad;
+        market = _deployMarket();
+        bad.mint(alice, 500e6);
+        bad.mint(bob, 500e6);
+        bad.mint(lp1, 500e6);
     }
 
     /// @dev The V1 invariants must survive the escrow bolt-on.
@@ -774,6 +864,356 @@ contract EventMarketV2Test is Test {
 
         vm.expectRevert(IEventMarketV2.BadRange.selector);
         market.getShocks(2, 1);
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                         SECURITY BOUNDARIES
+    //////////////////////////////////////////////////////////////*/
+
+    function test_ResolveAndScheduleAreAdminOnly() public {
+        vm.warp(bettingDeadline + 1);
+        market.lock();
+        vm.warp(resolveAfter);
+
+        vm.expectRevert(IEventMarket.OnlyAdmin.selector);
+        vm.prank(alice);
+        market.resolve(true, "not the admin");
+
+        vm.expectRevert(IEventMarket.OnlyAdmin.selector);
+        vm.prank(alice);
+        market.setSchedule(block.timestamp + 1 days, 0);
+
+        vm.expectRevert(IEventMarket.OnlyFactory.selector);
+        vm.prank(alice);
+        market.initializeMarket(alice, 1e6);
+
+        assertEq(uint8(market.status()), uint8(IEventMarket.Status.Locked), "still unsettled");
+    }
+
+    function test_ResolveRespectsResolveAfterBoundary() public {
+        vm.warp(bettingDeadline + 1);
+        market.lock();
+
+        vm.warp(resolveAfter - 1);
+        vm.expectRevert(IEventMarket.ResolveTooEarly.selector);
+        vm.prank(owner);
+        market.resolve(true, "too early");
+
+        vm.warp(resolveAfter);
+        vm.prank(owner);
+        market.resolve(true, "on time");
+        assertEq(uint8(market.status()), uint8(IEventMarket.Status.Settled));
+    }
+
+    /// The permissionless fallback needs a locked market and the full timelock,
+    /// and can only ever produce a draw.
+    function test_EmergencyDrawRequiresLockAndFullTimelock() public {
+        _buyYes(alice, 12e6);
+
+        vm.expectRevert(IEventMarket.WrongStatus.selector);
+        market.emergencyForceDraw();
+
+        vm.warp(bettingDeadline + 1);
+        market.lock();
+        uint256 unlockAt = resolveAfter + market.EMERGENCY_TIMELOCK();
+
+        vm.warp(unlockAt - 1);
+        vm.expectRevert(IEventMarket.EmergencyTimelockNotExpired.selector);
+        vm.prank(alice);
+        market.emergencyForceDraw();
+
+        vm.warp(unlockAt);
+        vm.prank(alice);
+        market.emergencyForceDraw();
+
+        assertTrue(market.isDraw());
+        assertFalse(market.yesWins());
+        assertEq(market.netUsdcPerYesToken() + market.netUsdcPerNoToken(), ONE, "draw rates sum to 1");
+        assertEq(usdc.balanceOf(platform), 0, "a draw pays no settlement fee");
+        _assertSolvent();
+    }
+
+    function test_SettlementIsTerminal() public {
+        _buyYes(alice, 12e6);
+        _settle(0);
+        uint256 platformPaid = usdc.balanceOf(platform);
+        assertEq(platformPaid, market.getStats().platformFee);
+
+        vm.startPrank(owner);
+        vm.expectRevert(IEventMarket.WrongStatus.selector);
+        market.resolve(false, "second resolution");
+        vm.expectRevert(IEventMarket.WrongStatus.selector);
+        market.setSchedule(block.timestamp + 1 days, 0);
+        vm.stopPrank();
+
+        vm.warp(resolveAfter + market.EMERGENCY_TIMELOCK());
+        vm.expectRevert(IEventMarket.WrongStatus.selector);
+        market.emergencyForceDraw();
+
+        vm.startPrank(alice);
+        usdc.approve(address(market), 1e6);
+        vm.expectRevert(IEventMarket.WrongStatus.selector);
+        market.buyYes(1e6, 0);
+        vm.expectRevert(IEventMarket.WrongStatus.selector);
+        market.sellYes(1, 0);
+        vm.expectRevert(IEventMarket.WrongStatus.selector);
+        market.redeemPair(1);
+        vm.stopPrank();
+
+        vm.expectRevert(IEventMarket.WrongStatus.selector);
+        vm.prank(creator);
+        market.removeLiquidity(1);
+
+        assertTrue(market.yesWins(), "outcome unchanged");
+        assertFalse(market.isDraw());
+        assertEq(usdc.balanceOf(platform), platformPaid, "settlement fee paid once");
+    }
+
+    function test_EmergencyDrawCannotBeOverriddenByResolve() public {
+        _settle(2);
+        vm.expectRevert(IEventMarket.WrongStatus.selector);
+        vm.prank(owner);
+        market.resolve(true, "late admin resolution");
+        assertTrue(market.isDraw());
+    }
+
+    function test_LpPayoutIsPaidExactlyOnce() public {
+        _buyYes(alice, 12e6);
+
+        vm.expectRevert(IEventMarket.WrongStatus.selector);
+        vm.prank(creator);
+        market.claimLpPayout();
+
+        _settle(0);
+
+        vm.expectRevert(IEventMarket.NotLP.selector);
+        vm.prank(alice);
+        market.claimLpPayout();
+
+        uint256 expected = _settledClaimOf(creator) - _outcomeClaimOf(creator);
+        uint256 before = usdc.balanceOf(creator);
+        vm.prank(creator);
+        market.claimLpPayout();
+        assertEq(usdc.balanceOf(creator) - before, expected, "pro-rata reserve payout");
+        assertTrue(market.lpClaimed(creator));
+
+        vm.expectRevert(IEventMarket.AlreadyClaimed.selector);
+        vm.prank(creator);
+        market.claimLpPayout();
+
+        _assertSolvent();
+    }
+
+    function test_RebateLpRewardAndVerdictArePaidExactlyOnce() public {
+        _buyYes(alice, 5e6);
+        _buyNo(bob, 4e6);
+        vm.warp(block.timestamp + COOLDOWN + 1);
+        market.resolveStale();
+
+        vm.expectRevert(IEventMarketV2.NothingToResolve.selector);
+        market.resolveStale();
+
+        uint256 rebate = market.rebateClaimable(alice);
+        assertEq(rebate, _prot(5e6));
+        uint256 before = usdc.balanceOf(alice);
+        vm.prank(alice);
+        market.claimRebate();
+        assertEq(usdc.balanceOf(alice) - before, rebate);
+        vm.expectRevert(IEventMarketV2.NothingToClaim.selector);
+        vm.prank(alice);
+        market.claimRebate();
+
+        uint256 reward = _lpClaimable(creator);
+        assertEq(reward, _base(5e6) + _base(4e6));
+        before = usdc.balanceOf(creator);
+        vm.prank(creator);
+        market.claimLpReward();
+        assertEq(usdc.balanceOf(creator) - before, reward);
+        vm.expectRevert(IEventMarketV2.NothingToClaim.selector);
+        vm.prank(creator);
+        market.claimLpReward();
+
+        _assertSolvent();
+    }
+
+    function test_ZeroAmountAndUninitializedPathsRevert() public {
+        EventMarketV2 fresh = new EventMarketV2(_params());
+
+        vm.startPrank(alice);
+        usdc.approve(address(fresh), 1e6);
+        vm.expectRevert(IEventMarket.ZeroReserves.selector);
+        fresh.buyYes(1e6, 0);
+        vm.expectRevert(IEventMarket.ZeroReserves.selector);
+        fresh.addLiquidity(1e6);
+        vm.stopPrank();
+
+        vm.expectRevert(IEventMarket.ZeroAmount.selector);
+        fresh.initializeMarket(creator, 0);
+        vm.expectRevert(IEventMarket.AlreadyInitialized.selector);
+        market.initializeMarket(creator, 1e6);
+
+        vm.startPrank(alice);
+        vm.expectRevert(IEventMarket.ZeroAmount.selector);
+        market.buyYes(0, 0);
+        vm.expectRevert(IEventMarket.ZeroAmount.selector);
+        market.sellYes(0, 0);
+        vm.expectRevert(IEventMarket.ZeroAmount.selector);
+        market.redeemPair(0);
+        vm.expectRevert(IEventMarket.ZeroAmount.selector);
+        market.removeLiquidity(0);
+        vm.stopPrank();
+
+        assertEq(usdc.balanceOf(address(fresh)), 0, "nothing stranded in the uninitialized market");
+    }
+
+    /// SafeERC20 must reject a token that reports failure instead of reverting,
+    /// and an undeliverable payout must stay owed.
+    function test_FalseReturningTokenCannotFakePayments() public {
+        MisbehavingERC20 bad = _useMisbehavingToken();
+        _buyYes(alice, 5e6);
+        vm.warp(block.timestamp + COOLDOWN + 1);
+        market.resolveStale();
+        uint256 owed = market.rebateClaimable(alice);
+        assertGt(owed, 0);
+
+        bad.setReturnFalse(true);
+
+        vm.startPrank(alice);
+        bad.approve(address(market), 12e6);
+        vm.expectRevert(abi.encodeWithSelector(SafeERC20.SafeERC20FailedOperation.selector, address(bad)));
+        market.buyYes(12e6, 0);
+        vm.expectRevert(abi.encodeWithSelector(SafeERC20.SafeERC20FailedOperation.selector, address(bad)));
+        market.claimRebate();
+        vm.stopPrank();
+
+        assertEq(market.rebateClaimable(alice), owed, "unpaid rebate is not marked paid");
+        assertEq(_tradeCount(), 1, "failed buy recorded no trade");
+        bad.setReturnFalse(false);
+        _assertSolvent();
+    }
+
+    function test_ReentrantTokenCannotReenterPayouts() public {
+        MisbehavingERC20 bad = _useMisbehavingToken();
+        _buyYes(alice, 5e6);
+        vm.warp(block.timestamp + COOLDOWN + 1);
+        market.resolveStale();
+        uint256 owed = market.rebateClaimable(alice);
+
+        bad.setReentry(address(market), abi.encodeCall(market.claimRebate, ()));
+        vm.expectRevert(ReentrancyGuard.ReentrancyGuardReentrantCall.selector);
+        vm.prank(alice);
+        market.claimRebate();
+        assertEq(market.rebateClaimable(alice), owed);
+
+        bad.setReentry(address(0), "");
+        _settle(0);
+
+        bad.setReentry(address(market), abi.encodeCall(market.claimLpPayout, ()));
+        vm.expectRevert(ReentrancyGuard.ReentrancyGuardReentrantCall.selector);
+        vm.prank(creator);
+        market.claimLpPayout();
+        assertFalse(market.lpClaimed(creator));
+
+        bad.setReentry(address(market), abi.encodeCall(market.redeemYes, (1)));
+        uint256 aliceYes = market.yesBalanceOf(alice);
+        vm.expectRevert(ReentrancyGuard.ReentrancyGuardReentrantCall.selector);
+        vm.prank(alice);
+        market.redeemYes(aliceYes);
+        assertEq(market.yesBalanceOf(alice), aliceYes);
+    }
+
+    /// USDG is an EIP-1967 proxy. The market only uses ERC-20 calls, so it must
+    /// behave identically when the collateral delegates to an implementation.
+    function test_MarketWorksWithEip1967ProxiedCollateral() public {
+        MockERC20 impl = new MockERC20("Proxy implementation", "IMPL", 6);
+        bytes memory init = abi.encodeCall(MockERC20.mint, (address(this), 0));
+        usdc = MockERC20(address(new ERC1967Proxy(address(impl), init)));
+        market = _deployMarket();
+        usdc.mint(alice, 500e6);
+        usdc.mint(bob, 500e6);
+
+        _buyYes(alice, 12e6);
+        _buyNo(bob, 6e6);
+        _assertAmmInvariants();
+        _assertSolvent();
+
+        _settle(0);
+        _drain(alice);
+        _drain(bob);
+        _drain(creator);
+
+        assertEq(address(market.usdc()), address(usdc));
+        assertEq(market.pendingEscrow(), 0);
+        assertEq(market.totalRebateOwed(), 0);
+        assertLe(usdc.balanceOf(address(market)), _dustBound(), "only rounding dust remains");
+    }
+
+    /// Every actor pulls everything they are owed after settlement. Floors only
+    /// ever round against the claimant, so nothing can be overpaid (the last
+    /// claim would revert) and what remains is bounded rounding dust.
+    function testFuzz_SettlementDrainLeavesOnlyRoundingDust(
+        uint256 yesSpend,
+        uint256 noSpend,
+        uint256 lpAdd,
+        uint256 sellBps,
+        uint256 mode
+    ) public {
+        yesSpend = bound(yesSpend, 1, 200e6);
+        noSpend = bound(noSpend, 1, 200e6);
+        lpAdd = bound(lpAdd, 1, 200e6);
+        sellBps = bound(sellBps, 0, BPS);
+        mode = bound(mode, 0, 2);
+
+        _buyYes(alice, yesSpend);
+        _addLiquidity(lp1, lpAdd);
+        _buyNo(bob, noSpend);
+        _sellYesFraction(alice, sellBps);
+        _removeHalfLiquidity(lp1);
+        _assertAmmInvariants();
+        _assertSolvent();
+
+        uint256 tc = market.totalCollateral();
+        _settle(mode);
+        _assertSolvent();
+        uint256 expectedPlatformFee = mode == 2 ? 0 : tc * PLATFORM_FEE_BPS / BPS;
+        assertEq(usdc.balanceOf(platform), expectedPlatformFee, "exact platform fee");
+
+        _drain(creator);
+        _drain(alice);
+        _drain(bob);
+        _drain(lp1);
+
+        assertEq(market.pendingEscrow(), 0, "no undecided escrow");
+        assertEq(market.totalRebateOwed(), 0, "every rebate paid");
+        assertLe(usdc.balanceOf(address(market)), _dustBound(), "only rounding dust remains");
+    }
+
+    /// Buying and immediately selling the whole position can never return more
+    /// value than was paid, even counting a full refund of the escrowed fee,
+    /// valuing leftover outcome dust at its maximum settlement value of one
+    /// unit each, and for amounts small enough that both fee slices floor to
+    /// zero.
+    function testFuzz_BuySellRoundTripCannotExtractCollateral(uint256 spend, bool yesSide) public {
+        spend = bound(spend, 1, 400e6);
+        uint256 before = usdc.balanceOf(alice);
+
+        if (yesSide) {
+            _buyYes(alice, spend);
+            uint256 bal = market.yesBalanceOf(alice);
+            vm.prank(alice);
+            market.sellYes(bal, 0);
+        } else {
+            _buyNo(alice, spend);
+            uint256 bal = market.noBalanceOf(alice);
+            vm.prank(alice);
+            market.sellNo(bal, 0);
+        }
+
+        uint256 recoverable = usdc.balanceOf(alice) + market.getUserOddsShift(alice).pendingEscrow
+            + market.yesBalanceOf(alice) + market.noBalanceOf(alice);
+        assertLe(recoverable, before, "round trip cannot extract collateral");
+        _assertAmmInvariants();
+        _assertSolvent();
     }
 
     /*//////////////////////////////////////////////////////////////
