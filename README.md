@@ -1,328 +1,647 @@
-# POP Protocol
+# POP
 
-POP Protocol is a prediction-market platform for creating, trading, and resolving event-based yes/no markets onchain. The project combines a Solidity smart-contract system, a TypeScript backend, a React web app, and supporting documentation to enable a market-making flow for event outcomes, liquidity provision, and automated settlement.
+> **An AMM-native prediction market for Robinhood Chain, denominated in USDG.**
 
-This repository contains the core platform logic and the surrounding tooling used to operate it in a multi-chain environment.
+POP brings Uniswap-style continuous liquidity to prediction markets.
 
-## Judge validation (October 4 submission)
+Instead of relying on an order book and dedicated market makers, POP lets users trade **YES / NO outcomes against onchain AMM liquidity**, turning market prices into continuously updating probabilities.
 
-A fresh clone can reproduce the active release gate from the repository root. The same commands are what CI runs. They do **not** deploy, broadcast, verify a contract, publish the frontend, or imply that Robinhood/USDG production deployment has occurred.
+**Live demo:** https://populab.xyz/robinhood
 
-```bash
-./scripts/validate-release.sh
+For **Arbitrum Open House Singapore 2026**, POP is being adapted for **Robinhood Chain + USDG**, together with **OddsShift**, a conditional fee-rebate mechanism designed to protect passive liquidity during information shocks.
+
+---
+
+## Why POP
+
+Prediction markets are markets for information.
+
+But most prediction-market liquidity today still depends on one of two models:
+
+- **Order books**, which depend on active market makers continuously quoting both sides.
+- **Static pooled markets**, which make participation simple but provide a weaker continuous trading experience.
+
+This becomes especially visible when important information arrives.
+
+A market can move from:
+
+```text
+Will the Fed cut rates?
+
+YES  50%
+NO   50%
 ```
 
-The script fails immediately on the first failed check. Equivalently, run the steps below by hand.
+to:
 
-### 1. Active / default Foundry suite
-
-From `contracts/`:
-
-```bash
-forge fmt --check
-forge build
-forge test -vvv
+```text
+YES  70%
 ```
 
-This is the only executable Solidity suite. It currently covers EventMarket V1, EventMarketV2, Robinhood deployment preflight, the Robinhood deploy script, and OddsShift flow scripts. Default `forge test -vvv` must report zero failures and zero skipped tests.
+within minutes.
 
-### 2. Preserved historical legacy tests
+That repricing is exactly what a prediction market should allow.
 
-Seven removed-module suites live under `contracts/legacy-tests/` and are documented in `contracts/legacy-tests/README.md` and `docs/FOUNDRY_TEST_BASELINE.md`. They are **not** part of the default suite and **do not pass**: the production contracts they import were removed before this release gate. Do not treat them as green coverage.
+But during the same move, market makers may widen spreads or pull quotes, while passive AMM liquidity continues quoting against traders who may already know that the old price is wrong.
 
-### 3. Security / static analysis
+POP explores a different market structure:
 
-```bash
-./scripts/slither-focused.sh
+```text
+event
+  ↓
+YES / NO market
+  ↓
+USDG liquidity
+  ↓
+AMM price discovery
+  ↓
+OddsShift liquidity protection
+  ↓
+resolution
+  ↓
+USDG settlement
 ```
 
-The focused scan covers `EventMarketV2`, `RobinhoodDeploymentPreflight`, and `DeployRobinhoodEventMarketV2`. Triage, including accepted rounding and false-positive detectors, is in `docs/EVENT_MARKET_V2_SECURITY_TRIAGE.md`.
+---
 
-### 4. Frontend validation
+## The Idea
 
-From `webapp/`:
+POP treats a prediction market more like an AMM than a sportsbook.
 
-```bash
-pnpm install --frozen-lockfile
-pnpm exec tsc -b --pretty false
-pnpm run lint:active
-pnpm build
-pnpm audit --prod
+Users can:
+
+- trade YES or NO continuously
+- enter and exit before resolution
+- provide liquidity to a market
+- observe probability directly from AMM prices
+- settle winning positions onchain
+
+The basic experience is:
+
+```text
+USDG
+ ↓
+POP Market
+ ↓
+YES / NO
+ ↓
+continuous trading
+ ↓
+market probability
+ ↓
+resolution
+ ↓
+USDG
 ```
 
-`pnpm lint` is the full-repository ESLint command. Historical pages that are not reachable from `/robinhood` can fail it. The release gate uses `pnpm run lint:active`, which lints the `/robinhood` import graph: `src/main.tsx`, shared shell modules, the OddsShift page, every file those modules import, Robinhood configuration, and `test/robinhood-config.test.ts`.
+A price of:
 
-### 5. Robinhood configuration validation
-
-```bash
-cd webapp
-pnpm test
+```text
+YES = 0.63 USDG
 ```
 
-These tests pin Robinhood Chain Testnet metadata and reject an invalid or zero market address. They do not talk to a live chain.
+can be interpreted as approximately:
 
-## Overview
+```text
+63% implied probability
+```
 
-The system is built around the idea of turning real-world questions into live, onchain markets:
+The market itself becomes the probability engine.
 
-- Users can create or trade yes/no markets around events and assets
-- Liquidity providers can supply USDG to market pools and earn fees
-- Prices are derived from AMM logic rather than an order book
-- Markets resolve to a final outcome and settle winners in USDG
-- Backend services monitor chain state, oracles, referrals, and user activity
+---
 
-The repo is organized into four main parts:
+# Built for Robinhood Chain
 
-- `contracts/` — Solidity market contracts and deployment scripts
-- `bot/` — TypeScript backend, API, workers, and chain integrations
-- `webapp/` — React + Vite frontend for the user interface
-- `documentation/` — product docs and concept notes
+For Open House, POP is being extended toward **Robinhood Chain** with **USDG as the prediction-market collateral and settlement asset**.
 
-## Core Product Concepts
+This pairing is intentional.
 
-### Event markets
+Robinhood Chain provides an environment focused on bringing financial products onchain, while USDG gives POP a dollar-denominated base asset for liquidity, trading and settlement.
 
-Markets are modeled as AMM-based yes/no tokens backed by USDG. A market can be created with a question, schedule, and collateral. The contract structure allows:
+In the target architecture:
 
-- trading YES and NO positions
-- adding or removing liquidity
-- reading live market state and statistics
-- settling a winner and distributing payouts
+```text
+                    POP
 
-### OddsShift
+            ┌─────────────────┐
+            │  Prediction     │
+USDG ──────►│  Market AMM     │
+            │                 │
+            │   YES     NO    │
+            └────────┬────────┘
+                     │
+               price discovery
+                     │
+                OddsShift
+                     │
+                  resolve
+                     │
+                    USDG
+```
 
-The project also includes a market-design note in [oddsshift.md](oddsshift.md) describing a fee and protection model for toxic flow and stale liquidity. The concept centers on dynamically assessing whether prior trades were harmful to LPs and adjusting settlement behavior accordingly.
+USDG is used for:
 
-### Multi-chain readiness
+- market collateral
+- AMM liquidity
+- trading
+- fees
+- winning-position redemption
 
-The backend is configured to support multiple supported chains, including Base Sepolia and Arc Testnet. Chain configuration is centralized and can be extended for additional deployment environments.
+This makes the market economically legible without introducing another internal settlement token.
 
-## Repository Structure
+---
+
+# OddsShift
+
+Prediction markets have an unusual liquidity problem.
+
+The most valuable trades often happen immediately after new information arrives.
+
+Imagine the market is trading at:
+
+```text
+50%
+```
+
+News arrives.
+
+A trader moves it:
+
+```text
+50% → 63%
+```
+
+If the market later continues toward 70%, the trader was helping the market discover a new probability — but they were also trading against liquidity still priced around the old information.
+
+This creates tension between:
+
+**price discovery for traders**
+
+and
+
+**sustainable liquidity for LPs.**
+
+OddsShift is POP's experimental answer.
+
+> **OddsShift is a conditional fee-rebate mechanism for AMM-based prediction markets during information shocks.**
+
+Every trade provisionally pays:
+
+```text
+Base LP Fee          0.30%
+LP Protection Fee    0.70%
+                     ─────
+Total                 1.00%
+```
+
+The 0.70% protection component is temporarily escrowed.
+
+Then the market looks at what happens next.
+
+### If the move persists
+
+```text
+50 → 57 → 60 → 63 → 67 → 70
+```
+
+the market interprets the move as genuine repricing.
+
+Liquidity around the old probability was stale, so qualifying shock-causing flow can pay the additional protection fee to LPs.
+
+### If the move reverses
+
+```text
+50 → 57 → 51
+```
+
+the move is treated as temporary impact rather than lasting information.
+
+The provisional 0.70% is rebated.
+
+The trader ultimately pays only the normal:
+
+```text
+0.30%
+```
+
+So the effective result is:
+
+```text
+fair flow        → 0.30%
+shock-causing    → 1.00%
+```
+
+OddsShift does this **without a news oracle, external price feed or AI classifier**.
+
+It uses subsequent market behavior to classify previous flow ex post.
+
+Read the full mechanism:
+
+[`oddsshift.md`](./oddsshift.md)
+
+---
+
+# How a POP Market Works
+
+## 1. Create
+
+A binary market is created around a resolvable question.
+
+```text
+Will the Fed cut rates?
+```
+
+Two outcome positions exist:
+
+```text
+YES
+NO
+```
+
+---
+
+## 2. Bootstrap Liquidity
+
+USDG is deposited into the market.
+
+Liquidity creates the initial pricing curve for YES and NO.
+
+---
+
+## 3. Trade
+
+Users buy or sell outcomes against the AMM.
+
+```text
+USDG → YES
+USDG → NO
+```
+
+No matching counterparty needs to be online for every trade.
+
+---
+
+## 4. Discover Probability
+
+Trading changes the AMM state.
+
+```text
+50%
+ ↓
+56%
+ ↓
+63%
+```
+
+The market price continuously expresses the market's current implied probability.
+
+---
+
+## 5. Handle Information Shocks
+
+When a sequence of trades rapidly reprices the market, OddsShift evaluates whether that move persists or reverses.
+
+```text
+                    repricing
+
+                       63%
+                      /   \
+                     /     \
+                  holds    reverts
+                   /          \
+             LP protection   rebate
+```
+
+This allows price discovery to remain open while making passive liquidity more resilient to stale-price trading.
+
+---
+
+## 6. Resolve
+
+Once the real-world event is known, the market is resolved to:
+
+```text
+YES = 1
+NO  = 0
+```
+
+or:
+
+```text
+YES = 0
+NO  = 1
+```
+
+---
+
+## 7. Redeem
+
+Winning positions redeem back into USDG.
+
+```text
+winning outcome
+      ↓
+    USDG
+```
+
+---
+
+# What We Built During Open House
+
+The Open House work focuses on turning POP into a **Robinhood Chain / USDG-ready AMM prediction market implementation**.
+
+### Prediction market contracts
+
+The current contract suite includes the active EventMarket implementation and its V2 evolution, covering:
+
+- YES / NO market lifecycle
+- USDG-denominated collateral accounting
+- AMM trading
+- liquidity management
+- market settlement
+- payout flows
+
+### Robinhood Chain preparation
+
+The repository includes dedicated Robinhood deployment and configuration work, including:
+
+- Robinhood Chain Testnet metadata
+- Robinhood deployment preflight checks
+- deployment scripts
+- frontend Robinhood configuration
+- contract-address validation
+
+### OddsShift integration
+
+OddsShift adds the experimental liquidity-protection layer:
+
+- provisional protection fee
+- escrow accounting
+- trade-window detection
+- persistent vs reverted move classification
+- trader rebate accounting
+- LP protection accounting
+- permissionless queue settlement for inactive markets
+
+### Frontend
+
+The Open House frontend includes a Robinhood-focused market experience built with React, TypeScript, Wagmi and Viem.
+
+### Release validation
+
+A repository-level release gate verifies:
+
+- Solidity formatting
+- contract compilation
+- Foundry tests
+- focused Slither analysis
+- frontend TypeScript
+- active frontend linting
+- production dependency audit
+- Robinhood configuration tests
+
+---
+
+# Architecture
+
+```text
+┌──────────────────────────────────────────────────────────┐
+│                         POP                              │
+└──────────────────────────────────────────────────────────┘
+
+                         USER
+                          │
+                          ▼
+                  ┌───────────────┐
+                  │   React App   │
+                  │ Wagmi / Viem  │
+                  └───────┬───────┘
+                          │
+                          ▼
+              ┌──────────────────────┐
+              │    EventMarketV2     │
+              │                      │
+              │  YES / NO Markets    │
+              │  AMM Pricing         │
+              │  USDG Liquidity      │
+              │  Settlement          │
+              └──────────┬───────────┘
+                         │
+             ┌───────────┴───────────┐
+             │                       │
+             ▼                       ▼
+      ┌─────────────┐         ┌──────────────┐
+      │  OddsShift  │         │ Resolution / │
+      │             │         │ Operations   │
+      │ fee escrow  │         │              │
+      │ flow window │         │ backend      │
+      │ rebates     │         │ workers      │
+      │ LP protect  │         │ monitoring   │
+      └─────────────┘         └──────────────┘
+
+                         │
+                         ▼
+
+                  Robinhood Chain
+                         │
+                        USDG
+```
+
+---
+
+# Why an AMM?
+
+Prediction markets are particularly compatible with AMMs because every trade changes two things at once:
+
+1. a user's economic exposure
+2. the market's estimate of probability
+
+An order-book market represents probability through the best available bids and asks.
+
+An AMM can represent it continuously through the curve itself.
+
+This gives POP several useful properties:
+
+- always-available onchain liquidity
+- transparent pricing
+- permissionless LP participation
+- deterministic execution
+- composable positions
+- continuous probability discovery
+
+The tradeoff is that passive liquidity can become stale during sudden information changes.
+
+That is the problem OddsShift is designed to explore.
+
+---
+
+# Repository
 
 ```text
 .
-├── bot/                          # Backend service and automation
-│   ├── src/                      # TypeScript application code
-│   ├── prisma/                   # Prisma schema and migrations
-│   ├── config/                   # Market configuration data
-│   ├── scripts/                  # Operational scripts
-│   ├── package.json              # Backend dependencies and scripts
-│   └── tsconfig*.json            # TypeScript project config
-├── contracts/                    # Solidity contracts and Foundry setup
-│   ├── src/                      # Market and factory contracts
-│   ├── script/                   # Deployment scripts
-│   ├── test/                     # Foundry tests
-│   ├── foundry.toml              # Foundry configuration
-│   └── README.md                 # Foundry usage notes
-├── webapp/                       # Frontend application
-│   ├── src/                      # React app source
-│   ├── public/                   # Static assets
-│   ├── package.json              # Frontend dependencies and scripts
-│   └── vite.config.ts            # Vite configuration
-├── documentation/                # Docs site content and guides
-├── packages/                     # Shared RPC utilities / package helpers
-├── oddsshift.md                  # Market mechanism concept note
-├── .gitmodules                   # Submodule config
-├── README.md                     # Project overview
-└── ...
+├── contracts/
+│   ├── src/                # Prediction-market contracts
+│   ├── script/             # Deployment scripts
+│   ├── test/               # Active Foundry test suite
+│   └── legacy-tests/       # Preserved historical tests
+│
+├── webapp/
+│   ├── src/                # React application
+│   └── test/               # Frontend / chain configuration tests
+│
+├── bot/
+│   └── src/                # API, workers and market operations
+│
+├── packages/
+│   └── rpc/                # Shared RPC tooling
+│
+├── scripts/
+│   ├── validate-release.sh
+│   └── slither-focused.sh
+│
+├── submission-evidence/    # Open House submission evidence
+├── docs/                   # Technical and security documentation
+├── oddsshift.md             # OddsShift mechanism specification
+└── README.md
 ```
 
-## Tech Stack
+---
 
-### Smart contracts
+# Tech Stack
 
-- Solidity 0.8.24
+### Smart Contracts
+
+- Solidity `0.8.24`
 - Foundry
-- OpenZeppelin contracts
-- Multi-chain deployment support
+- OpenZeppelin
+- Slither
+
+### Frontend
+
+- React 19
+- TypeScript
+- Vite
+- Wagmi
+- Viem
+- TanStack Query
 
 ### Backend
 
 - TypeScript
 - Node.js
 - Express
-- Prisma ORM
+- Prisma
 - PostgreSQL
-- Viem for blockchain interaction
-- Telegram/X integration support
-- SIWE-based wallet authentication
+
+### Target Environment
+
+- Robinhood Chain
+- USDG
+
+---
+
+# Validation
+
+The complete Open House release gate can be reproduced from the repository root:
+
+```bash
+./scripts/validate-release.sh
+```
+
+The validation pipeline checks the active submission surface rather than claiming historical code as current coverage.
+
+### Contracts
+
+```bash
+cd contracts
+
+forge fmt --check
+forge build
+forge test -vvv
+```
+
+The active suite covers the current EventMarket contracts, Robinhood deployment preparation and OddsShift flows.
+
+### Security analysis
+
+```bash
+./scripts/slither-focused.sh
+```
+
+Focused static analysis covers the active Open House contract and deployment surface.
+
+Security triage and accepted findings are documented under `docs/`.
 
 ### Frontend
 
-- React 19
-- Vite
-- TypeScript
-- React Router
-- Web3 wallet tooling via Wagmi and Viem
-- TanStack Query
-
-## Key Features
-
-- Onchain prediction markets backed by USDG
-- Liquidity provision and AMM-based pricing
-- Market settlement and payout flows
-- Wallet authentication and session handling
-- Referral and attribution tracking
-- Portfolio analytics and user P&L history
-- Multi-chain configuration and operational tooling
-- Telegram/X bot support for market creation and user interactions
-- Oracle registry and verification workflow for market data feeds
-
-## Smart Contract Layer
-
-The Solidity system is centered on event-based market contracts and factory patterns.
-
-Important contract areas include:
-
-- `EventMarket.sol` — main event market contract
-- `EventMarketFactory.sol` — factory for market deployment
-- additional contract modules for prediction markets, price oracles, and market infrastructure
-
-These contracts implement the pricing, liquidity, settlement, and admin logic used by the platform.
-
-## Backend Responsibilities
-
-The TypeScript backend in `bot/` provides the operational layer behind the platform. It is responsible for:
-
-- serving the API for webapp requests
-- tracking blockchain state
-- connecting to supported chains
-- handling auth and signed sessions
-- reading and aggregating market data
-- monitoring settlements and verification jobs
-- integrating with Telegram/X automation flows
-- storing state in PostgreSQL via Prisma
-
-The API includes endpoints for:
-
-- health checks
-- chain metadata
-- auth and signer verification
-- portfolio aggregation
-- referral tracking
-- swarm/oracle-related telemetry
-
-## Frontend Responsibilities
-
-The React app in `webapp/` is the user-facing dashboard and market interface. It supports:
-
-- market browsing by category
-- wallet-aware auth flow
-- portfolio tracking
-- market stats and detail views
-- liquidity pages and result views
-- route-based navigation for multiple market types
-
-## Setup and Local Development
-
-### 1. Install dependencies
-
-Backend:
-
-```bash
-cd bot
-npm install
-```
-
-Frontend:
-
 ```bash
 cd webapp
-npm install
+
+pnpm install --frozen-lockfile
+pnpm exec tsc -b --pretty false
+pnpm run lint:active
+pnpm build
+pnpm audit --prod
+pnpm test
 ```
 
-Contracts:
+The Robinhood configuration tests verify expected chain metadata and prevent invalid market-address configuration.
+
+---
+
+# Local Development
+
+### Contracts
 
 ```bash
 cd contracts
 forge install
 forge build
-```
-
-### 2. Configure environment variables
-
-The backend reads configuration from `bot/src/common/env` and expects environment secrets such as:
-
-- `DATABASE_URL`
-- `BOT_PRIVATE_KEY`
-- `JWT_SECRET`
-- `TELEGRAM_BOT_TOKEN`
-- `OPENAI_API_KEY`
-- `BASESCAN_API_KEY`
-- `X_API_BEARER_TOKEN`
-- `X_API_ACCESS_TOKEN`
-- `X_API_CONSUMER_KEY`
-- `X_API_CONSUMER_SECRET`
-- `X_API_ACCESS_TOKEN_SECRET`
-
-A local config example is defined in `bot/src/common/env/local.ts`.
-
-### 3. Initialize the database
-
-```bash
-cd bot
-npm run db:generate
-npm run db:push
-```
-
-You may also use Prisma migrations when preparing a fresh database setup:
-
-```bash
-npm run db:migrate
-```
-
-### 4. Run the services
-
-Start the backend service:
-
-```bash
-cd bot
-npm run dev
-```
-
-Start the frontend:
-
-```bash
-cd webapp
-npm run dev
-```
-
-Build the backend:
-
-```bash
-cd bot
-npm run build
-```
-
-Build the frontend:
-
-```bash
-cd webapp
-npm run build
-```
-
-### 5. Run contracts tests
-
-```bash
-cd contracts
 forge test
 ```
 
-## Operational Notes
+### Frontend
 
-- The project is designed for a multi-chain deployment model with chain identifiers and contract addresses configured centrally.
-- Verification, settlement, monitoring, and oracle tasks are handled by background workers and scripts.
-- The platform includes both event-driven and polling-based job execution patterns.
-- The app has explicit support for auth, referral attribution, and user-specific portfolio history.
+```bash
+cd webapp
+pnpm install
+pnpm run dev
+```
 
-## Documentation
+### Backend
 
-Additional details can be found in the project docs under the `documentation/` folder and in the concept notes such as [oddsshift.md](oddsshift.md).
+```bash
+cd bot
+npm install
+npm run dev
+```
 
-## License
+---
 
-This repository currently appears to be a proprietary or closed project, and no explicit license file is present in the root of the workspace. Please confirm the intended license before public distribution or commercial reuse.
+# Deployment Status
 
-## Summary
+POP is actively being prepared and validated for the Robinhood Chain / USDG environment.
 
-POP Protocol is a full-stack prediction-market platform combining blockchain contracts, a background service layer, and a user-facing app to enable transparent event trading, AMM-based pricing, and onchain settlement. The project is structured for extensibility across multiple chains and supports both market operations and ecosystem automation.
+The repository contains Robinhood-specific configuration, deployment preflight logic and validation tooling.
+
+Passing the local release gate verifies the implementation and configuration; it should not be interpreted by itself as proof of a live production deployment.
+
+Deployment evidence, where applicable, is kept separately under:
+
+[`submission-evidence/`](./submission-evidence/)
+
+---
+
+# Vision
+
+Prediction markets compress disagreement into a price.
+
+POP asks what happens if that market structure is built natively around:
+
+**stablecoin liquidity + AMMs + programmable market microstructure.**
+
+Robinhood Chain and USDG provide the financial base layer.
+
+POP provides the prediction market.
+
+OddsShift explores how its liquidity can survive the moments when information matters most.
