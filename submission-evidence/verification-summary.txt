@@ -1,0 +1,23 @@
+POP / OddsShift — EventMarketV2 Verification
+
+Network: Robinhood Chain Testnet
+Chain ID: 46630
+Contract: 0x4F946Cca7f8da191168f76Fe12fbD6cfa1CAA26e
+Deployment tx: 0x6b3a39b82ea54c166694687df30bf47523c072658d22f45a40b2d77cda61e5ab
+
+Compiler: Solidity 0.8.24+commit.e11b9ed9
+Optimizer: enabled, 200 runs
+EVM version: cancun
+viaIR: true
+Metadata bytecodeHash: ipfs
+
+Sourcify:
+- exact_match
+- creationMatch: exact_match
+- runtimeMatch: exact_match
+- matchId: 54584650
+
+Root cause of initial verification failure:
+The reduced Forge verifier payload contained 16 source units, while the original
+Foundry build compilation contained 103 source units. Verification succeeded
+after submitting the exact full build-info compiler input.
