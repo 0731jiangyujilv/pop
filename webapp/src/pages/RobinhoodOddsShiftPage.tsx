@@ -1,5 +1,4 @@
 import { useParams } from 'react-router-dom'
-import { SiteNav } from '@/components/SiteNav'
 import { EngineeringEvidence, OnchainEvidenceDrawer } from '@/components/oddsshift/EvidenceExplorer'
 import { LiveAccounting } from '@/components/oddsshift/LiveAccounting'
 import { LiveDeploymentHeader } from '@/components/oddsshift/LiveDeploymentHeader'
@@ -9,21 +8,24 @@ import {
   FairScenarioCard,
   ToxicScenarioCard,
 } from '@/components/oddsshift/ScenarioCards'
+import { SiteNav } from '@/components/SiteNav'
 import {
   ROBINHOOD_EVENT_MARKET_V2_ADDRESS,
   resolveRobinhoodMarketAddress,
 } from '@/config/robinhood'
 import { LIVE_MARKET, isZeroLiability } from '@/data/robinhoodLiveEvidence'
 import { useRobinhoodLiveState } from '@/hooks/useRobinhoodLiveState'
+import { ROBINHOOD_ODDS_SHIFT_DEPLOYMENT } from '@/config/oddsShiftDeployments'
+import { OddsShiftPage } from '@/pages/OddsShiftPage'
 import { POP_AMM_CSS } from './popAmmStyles'
 import { ROBINHOOD_EVIDENCE_CSS } from './robinhoodEvidenceStyles'
 
 /**
- * Judge-facing Robinhood OddsShift live-evidence experience.
+ * Robinhood OddsShift experience: interactive trading on top (reusing the
+ * existing OddsShift demo UI), with the verified live-evidence sections below.
  *
- * Read-only: no wallet-required trading, claiming, or resolve controls.
- * Historical FAIR/TOXIC narration comes from immutable evidence; counters may
- * refresh from the live contract when RPC is available.
+ * Trading targets the deployed Robinhood EventMarketV2 + Paxos USDG via the
+ * shared OddsShiftPage implementation — no parallel trade stack.
  */
 export function RobinhoodOddsShiftPage() {
   const { contractAddress } = useParams<{ contractAddress: string }>()
@@ -50,10 +52,10 @@ export function RobinhoodOddsShiftPage() {
     )
   }
 
-  return <RobinhoodEvidenceExperience marketAddr={marketAddr} />
+  return <RobinhoodInteractiveExperience marketAddr={marketAddr} />
 }
 
-function RobinhoodEvidenceExperience({ marketAddr }: { marketAddr: `0x${string}` }) {
+function RobinhoodInteractiveExperience({ marketAddr }: { marketAddr: `0x${string}` }) {
   const live = useRobinhoodLiveState(marketAddr)
   // Prefer live zero-liability when RPC succeeds; otherwise the immutable
   // settled-demo evidence remains the credibility signal for judges.
@@ -65,14 +67,22 @@ function RobinhoodEvidenceExperience({ marketAddr }: { marketAddr: `0x${string}`
       <style>{ROBINHOOD_EVIDENCE_CSS}</style>
       <SiteNav />
 
-      <main className="rh-wrap">
+      {/* Existing OddsShift trading UI — Robinhood chain, USDG, live market. */}
+      <OddsShiftPage
+        deployment={ROBINHOOD_ODDS_SHIFT_DEPLOYMENT}
+        marketAddress={marketAddr}
+        embedded
+      />
+
+      <main className="rh-wrap rh-evidence-below">
         <div className="rh-stack">
-          <span className="rh-eyebrow">OddsShift · Robinhood live evidence</span>
-          <h1 className="rh-hero">Protect LPs from sustained causative flow</h1>
+          <span className="rh-eyebrow">Verified settlement snapshot</span>
+          <h2 className="rh-hero rh-evidence-hero">Captured demo run on Robinhood Chain</h2>
           <p className="rh-lede">
-            OddsShift escrows a protection fee, then uses <b>observable subsequent repricing</b> to
-            decide whether that escrow is refunded or transferred to LPs. This page is the settled
-            Robinhood Chain Testnet proof — no wallet required.
+            The sections below are the <b>verified settlement snapshot</b> from the completed
+            OddsShift demo. Live market values above come from the contract; headline demo totals
+            (20 trades, 4 shocks, 68.50%) are labeled as a captured run and are not permanent live
+            state.
           </p>
 
           <LiveDeploymentHeader liveUnavailable={live.unavailable} zeroLiability={zeroLiability} />
