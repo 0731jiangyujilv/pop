@@ -8,6 +8,8 @@ export const ROBINHOOD_EVIDENCE_CSS = `
 .popamm .rh-evidence-hero{font-size:clamp(20px,3.4vw,30px)}
 .popamm .rh-stack{width:100%;max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
 .popamm .os-embedded .os-wrap{padding-top:12px;padding-bottom:28px}
+/* Robinhood ticket collateral chip — USDG instead of the shared USDC .pp-coin asset. */
+.popamm .pp-coin{background:#1FAF6B url(/icons/usdg.svg) center/cover no-repeat}
 .popamm .rh-eyebrow{display:inline-flex;align-items:center;gap:8px;margin:0 auto 8px;padding:6px 14px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--pp-accent);background:rgba(255,51,95,.07);border:1px solid rgba(255,51,95,.18)}
 .popamm .rh-hero{margin:0;text-align:center;font-size:clamp(22px,4vw,36px);font-weight:700;letter-spacing:-.03em;line-height:1.1}
 .popamm .rh-lede{margin:0 auto;max-width:720px;text-align:center;font-size:14px;font-weight:500;line-height:1.65;color:var(--pp-muted)}
