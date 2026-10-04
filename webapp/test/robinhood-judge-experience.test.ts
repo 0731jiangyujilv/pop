@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url'
 import test from 'node:test'
 import {
   ROBINHOOD_CHAIN_ID,
-  ROBINHOOD_EVENT_MARKET_V2_ADDRESS,
+  ROBINHOOD_EVIDENCE_MARKET_ADDRESS,
   ROBINHOOD_EXPLORER_URL,
   robinhoodTxUrl,
 } from '../src/config/robinhood.ts'
@@ -116,7 +116,7 @@ test('responsive evidence cards use stacked layouts under narrow breakpoints', (
 test('all explorer links stay on Robinhood testnet chain 46630', () => {
   assert.equal(LIVE_MARKET.chainId, ROBINHOOD_CHAIN_ID)
   assert.equal(LIVE_MARKET.chainId, 46_630)
-  assert.equal(LIVE_MARKET.marketAddress, ROBINHOOD_EVENT_MARKET_V2_ADDRESS)
+  assert.equal(LIVE_MARKET.marketAddress, ROBINHOOD_EVIDENCE_MARKET_ADDRESS)
 
   for (const tx of EVIDENCE_TXS) {
     const url = robinhoodTxUrl(tx.hash)

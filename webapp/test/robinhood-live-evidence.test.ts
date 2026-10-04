@@ -3,6 +3,7 @@ import test from 'node:test'
 import {
   ROBINHOOD_CHAIN_ID,
   ROBINHOOD_EVENT_MARKET_V2_ADDRESS,
+  ROBINHOOD_EVIDENCE_MARKET_ADDRESS,
   ROBINHOOD_EXPLORER_URL,
   ROBINHOOD_SOURCIFY_VERIFICATION_ID,
   ROBINHOOD_USDG_ADDRESS,
@@ -34,7 +35,12 @@ test('Robinhood live deployment constants match verified testnet market', () => 
   assert.equal(LIVE_MARKET.chainId, 46_630)
   assert.equal(LIVE_MARKET.chainId, ROBINHOOD_CHAIN_ID)
   assert.notEqual(LIVE_MARKET.chainId, 4663)
-  assert.equal(LIVE_MARKET.marketAddress, ROBINHOOD_EVENT_MARKET_V2_ADDRESS)
+  // Historical evidence stays on the captured FAIR/TOXIC market.
+  assert.equal(LIVE_MARKET.marketAddress, ROBINHOOD_EVIDENCE_MARKET_ADDRESS)
+  assert.equal(LIVE_MARKET.marketAddress, '0x4F946Cca7f8da191168f76Fe12fbD6cfa1CAA26e')
+  // Interactive trading uses a distinct live market.
+  assert.equal(ROBINHOOD_EVENT_MARKET_V2_ADDRESS, '0x5c70D71Bc29b883c0F10DEC5E8Aacd3F17B99a61')
+  assert.notEqual(LIVE_MARKET.marketAddress, ROBINHOOD_EVENT_MARKET_V2_ADDRESS)
   assert.equal(LIVE_MARKET.usdgAddress, ROBINHOOD_USDG_ADDRESS)
   assert.match(LIVE_MARKET.marketAddress, ADDRESS)
   assert.equal(LIVE_MARKET.question, 'Will BTC close above $100k this week?')

@@ -6,6 +6,7 @@ import test from 'node:test'
 import {
   ROBINHOOD_CHAIN_ID,
   ROBINHOOD_EVENT_MARKET_V2_ADDRESS,
+  ROBINHOOD_EVIDENCE_MARKET_ADDRESS,
   ROBINHOOD_EXPLORER_URL,
   ROBINHOOD_USDG_ADDRESS,
 } from '../src/config/robinhood.ts'
@@ -24,7 +25,9 @@ test('Robinhood OddsShift deployment pins chain 46630, USDG, and EventMarketV2',
   assert.match(dep, /expectedCollateralAddress: ROBINHOOD_USDG_ADDRESS/)
   assert.match(dep, /expectedCollateralSymbol: 'USDG'/)
   assert.match(dep, /faucetEnabled: false/)
-  assert.equal(ROBINHOOD_EVENT_MARKET_V2_ADDRESS, '0x4F946Cca7f8da191168f76Fe12fbD6cfa1CAA26e')
+  assert.equal(ROBINHOOD_EVENT_MARKET_V2_ADDRESS, '0x5c70D71Bc29b883c0F10DEC5E8Aacd3F17B99a61')
+  assert.equal(ROBINHOOD_EVIDENCE_MARKET_ADDRESS, '0x4F946Cca7f8da191168f76Fe12fbD6cfa1CAA26e')
+  assert.notEqual(ROBINHOOD_EVENT_MARKET_V2_ADDRESS, ROBINHOOD_EVIDENCE_MARKET_ADDRESS)
   assert.equal(ROBINHOOD_USDG_ADDRESS, '0x7E955252E15c84f5768B83c41a71F9eba181802F')
   assert.equal(ROBINHOOD_CHAIN_ID, 46_630)
   assert.equal(ROBINHOOD_EXPLORER_URL, 'https://explorer.testnet.chain.robinhood.com')
@@ -96,6 +99,8 @@ test('Robinhood page keeps evidence sections under the interactive market', () =
   ]) {
     assert.match(page, new RegExp(marker))
   }
+  // Evidence RPC reads stay pinned to the historical market, not the live trade target.
+  assert.match(page, /useRobinhoodLiveState\(LIVE_MARKET\.marketAddress\)/)
 })
 
 test('evidence narrative components remain free of write controls', () => {

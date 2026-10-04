@@ -12,7 +12,7 @@ import {
 } from '@/config/abi/eventMarketV2'
 import {
   ROBINHOOD_CHAIN_ID,
-  ROBINHOOD_EVENT_MARKET_V2_ADDRESS,
+  ROBINHOOD_EVIDENCE_MARKET_ADDRESS,
   validatedAddress,
 } from '@/config/robinhood'
 import { LIVE_MARKET } from '@/data/robinhoodLiveEvidence'
@@ -41,7 +41,7 @@ export type RobinhoodLiveState = {
 }
 
 export function useRobinhoodLiveState(
-  marketAddress: string | undefined = ROBINHOOD_EVENT_MARKET_V2_ADDRESS,
+  marketAddress: string | undefined = ROBINHOOD_EVIDENCE_MARKET_ADDRESS,
 ): RobinhoodLiveState {
   const market = validatedAddress(marketAddress) ?? validatedAddress(LIVE_MARKET.marketAddress)
   const chainId = ROBINHOOD_CHAIN_ID

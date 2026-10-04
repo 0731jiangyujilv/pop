@@ -7,15 +7,28 @@ export const ROBINHOOD_RPC_URL = 'https://rpc.testnet.chain.robinhood.com'
 export const ROBINHOOD_EXPLORER_URL = 'https://explorer.testnet.chain.robinhood.com'
 export const ROBINHOOD_USDG_ADDRESS = '0x7E955252E15c84f5768B83c41a71F9eba181802F' as Address
 
-/** Live settled OddsShift demo market on Robinhood Chain Testnet. */
+/**
+ * Live interactive OddsShift market on Robinhood Chain Testnet.
+ * `/robinhood` trades against this deployment.
+ */
 export const ROBINHOOD_EVENT_MARKET_V2_ADDRESS =
+  '0x5c70D71Bc29b883c0F10DEC5E8Aacd3F17B99a61' as Address
+
+/**
+ * Historical FAIR/TOXIC settlement evidence market. Immutable captured demo —
+ * never used as the interactive trading target.
+ */
+export const ROBINHOOD_EVIDENCE_MARKET_ADDRESS =
   '0x4F946Cca7f8da191168f76Fe12fbD6cfa1CAA26e' as Address
 
 export const ROBINHOOD_DEPLOYER_ADDRESS =
   '0xA5B709025224bA08B8eFfF1b0D1d28E970A34Cf3' as Address
 
-/** Sourcify verification job that returned an exact creation + runtime match. */
+/** Sourcify verification job for the historical evidence market (exact match). */
 export const ROBINHOOD_SOURCIFY_VERIFICATION_ID = 'e81be92a-9950-4d1e-a453-753456c39434'
+
+/** Sourcify verification job for the live interactive market (exact match). */
+export const ROBINHOOD_LIVE_SOURCIFY_VERIFICATION_ID = '00ba18f3-e119-4b42-9c76-2e3fe7340447'
 
 export const robinhoodTestnet: Chain = {
   id: ROBINHOOD_CHAIN_ID,
@@ -98,11 +111,12 @@ export function shortHash(value: string, left = 6, right = 4): string {
 }
 
 /**
- * Sourcify lookup page for the live Robinhood market.
- * Exact-match verification succeeded; Blockscout forwarding did not.
+ * Sourcify lookup page. Defaults to the historical evidence market used by the
+ * captured FAIR/TOXIC settlement narrative. Exact-match verification succeeded;
+ * Blockscout forwarding did not.
  */
 export function sourcifyLookupUrl(
-  address: Address | string = ROBINHOOD_EVENT_MARKET_V2_ADDRESS,
+  address: Address | string = ROBINHOOD_EVIDENCE_MARKET_ADDRESS,
   chainId: number = ROBINHOOD_CHAIN_ID,
 ): string {
   return `https://repo.sourcify.dev/contracts/full_match/${chainId}/${address}/`

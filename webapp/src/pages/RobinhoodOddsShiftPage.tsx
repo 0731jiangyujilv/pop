@@ -56,7 +56,9 @@ export function RobinhoodOddsShiftPage() {
 }
 
 function RobinhoodInteractiveExperience({ marketAddr }: { marketAddr: `0x${string}` }) {
-  const live = useRobinhoodLiveState(marketAddr)
+  // Evidence sections read the historical captured market only. Interactive
+  // trading above targets `marketAddr` (the new live deployment).
+  const live = useRobinhoodLiveState(LIVE_MARKET.marketAddress)
   // Prefer live zero-liability when RPC succeeds; otherwise the immutable
   // settled-demo evidence remains the credibility signal for judges.
   const zeroLiability = live.zeroLiabilityLive ?? isZeroLiability()

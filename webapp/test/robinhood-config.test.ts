@@ -5,7 +5,9 @@ import {
   ROBINHOOD_CHAIN_SLUG,
   ROBINHOOD_CHAIN_SLUG_ALIAS,
   ROBINHOOD_EVENT_MARKET_V2_ADDRESS,
+  ROBINHOOD_EVIDENCE_MARKET_ADDRESS,
   ROBINHOOD_EXPLORER_URL,
+  ROBINHOOD_LIVE_SOURCIFY_VERIFICATION_ID,
   ROBINHOOD_RPC_URL,
   ROBINHOOD_SOURCIFY_VERIFICATION_ID,
   addressExplorerUrl,
@@ -73,9 +75,16 @@ test('wrong-chain detection and explorer links are deterministic', () => {
   assert.equal(txExplorerUrl(ROBINHOOD_EXPLORER_URL, tx), `${ROBINHOOD_EXPLORER_URL}/tx/${tx}`)
   assert.equal(robinhoodTxUrl(tx), `${ROBINHOOD_EXPLORER_URL}/tx/${tx}`)
   assert.equal(shortHash(tx), '0x0c3f…f0b2')
-  assert.equal(ROBINHOOD_EVENT_MARKET_V2_ADDRESS, '0x4F946Cca7f8da191168f76Fe12fbD6cfa1CAA26e')
+  assert.equal(ROBINHOOD_EVENT_MARKET_V2_ADDRESS, '0x5c70D71Bc29b883c0F10DEC5E8Aacd3F17B99a61')
+  assert.equal(ROBINHOOD_EVIDENCE_MARKET_ADDRESS, '0x4F946Cca7f8da191168f76Fe12fbD6cfa1CAA26e')
   assert.equal(ROBINHOOD_SOURCIFY_VERIFICATION_ID, 'e81be92a-9950-4d1e-a453-753456c39434')
+  assert.equal(ROBINHOOD_LIVE_SOURCIFY_VERIFICATION_ID, '00ba18f3-e119-4b42-9c76-2e3fe7340447')
   assert.match(sourcifyLookupUrl(), /full_match\/46630\//)
+  assert.match(sourcifyLookupUrl(), /0x4F946Cca7f8da191168f76Fe12fbD6cfa1CAA26e/)
+  assert.match(
+    sourcifyLookupUrl(ROBINHOOD_EVENT_MARKET_V2_ADDRESS),
+    /0x5c70D71Bc29b883c0F10DEC5E8Aacd3F17B99a61/,
+  )
 })
 
 test('real USDG routes never expose the mock-token faucet', () => {
