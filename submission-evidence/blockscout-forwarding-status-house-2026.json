@@ -1,0 +1,7 @@
+{
+  "result": "Fail - Unable to verify",
+  "statusUrl": "https://explorer.testnet.chain.robinhood.com/api?module=contract&action=checkverifystatus&chainid=46630&guid=5c70d71bc29b883c0f10dec5e8aacd3f17b99a616ac1ea52",
+  "address": "0x5c70D71Bc29b883c0F10DEC5E8Aacd3F17B99a61",
+  "chainId": 46630,
+  "note": "Sourcify exact_match succeeded; Robinhood Blockscout forwarding failed (same as prior deployment)."
+}

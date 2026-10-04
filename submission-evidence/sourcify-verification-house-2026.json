@@ -1,0 +1,24 @@
+{
+  "isJobCompleted": true,
+  "verificationId": "00ba18f3-e119-4b42-9c76-2e3fe7340447",
+  "jobStartTime": "2026-10-04T05:55:18Z",
+  "jobFinishTime": "2026-10-04T05:55:29Z",
+  "compilationTime": "10392",
+  "externalVerifications": {
+    "blockscout": {
+      "verificationId": "5c70d71bc29b883c0f10dec5e8aacd3f17b99a616ac1ea52",
+      "statusUrl": "https://explorer.testnet.chain.robinhood.com/api?module=contract&action=checkverifystatus&chainid=46630&guid=5c70d71bc29b883c0f10dec5e8aacd3f17b99a616ac1ea52",
+      "explorerUrl": "https://explorer.testnet.chain.robinhood.com//address/0x5c70D71Bc29b883c0F10DEC5E8Aacd3F17B99a61",
+      "contractApiUrl": "https://explorer.testnet.chain.robinhood.com/api?module=contract&action=getabi&chainid=46630&address=0x5c70D71Bc29b883c0F10DEC5E8Aacd3F17B99a61"
+    }
+  },
+  "contract": {
+    "match": "exact_match",
+    "creationMatch": "exact_match",
+    "runtimeMatch": "exact_match",
+    "chainId": "46630",
+    "address": "0x5c70D71Bc29b883c0F10DEC5E8Aacd3F17B99a61",
+    "verifiedAt": "2026-10-04T05:55:29Z",
+    "matchId": "54596093"
+  }
+}
