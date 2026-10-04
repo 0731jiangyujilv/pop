@@ -13,8 +13,6 @@ const NAV_ITEMS: NavItem[] = [
   // { label: 'Trade', to: '/' },
   // { label: 'FIFA 2026', to: '/' },
   { label: 'OddsShift', to: '/robinhood' },
-  { label: 'Crypto', to: '/crypto' },
-  { label: 'Fed', to: '/fed' },
   { label: 'Midterms', to: '/midterm' },
   // { label: 'Pool Odds', to: '/champion-history' },
   { label: 'NFL 2026', to: '/nfl' },

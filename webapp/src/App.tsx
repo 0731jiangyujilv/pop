@@ -8,8 +8,6 @@ import { useAuth } from '@/hooks/useAuth'
 import { captureReferralCode, connectPendingReferral } from '@/lib/referrals'
 // import { HomePage } from '@/pages/HomePage'
 // import { ExploreMarketPage } from '@/pages/ExploreMarketPage'
-import { FedMarketsPage } from '@/pages/FedMarketsPage'
-import { CryptoMarketsPage } from '@/pages/CryptoMarketsPage'
 import { MidtermMarketsPage } from '@/pages/MidtermMarketsPage'
 import { NflCalendarPage } from '@/pages/NflCalendarPage'
 // import { DocumentationPage } from '@/pages/DocumentationPage'
@@ -60,10 +58,8 @@ function App() {
           <BrowserRouter>
             <ReferralTracker />
             <Routes>
-              <Route path="/" element={<FedMarketsPage/>} />
+              <Route path="/" element={<RobinhoodOddsShiftPage />} />
               {/* <Route path="/explore" element={<ExploreMarketPage />} /> */}
-              <Route path="/fed" element={<FedMarketsPage />} />
-              <Route path="/crypto" element={<CryptoMarketsPage />} />
               <Route path="/midterm" element={<MidtermMarketsPage />} />
               <Route path="/nfl" element={<NflCalendarPage />} />
               <Route path="/champion-history" element={<ChampionPoolHistoryPage />} />
