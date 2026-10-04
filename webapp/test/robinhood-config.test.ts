@@ -4,15 +4,21 @@ import {
   ROBINHOOD_CHAIN_ID,
   ROBINHOOD_CHAIN_SLUG,
   ROBINHOOD_CHAIN_SLUG_ALIAS,
+  ROBINHOOD_EVENT_MARKET_V2_ADDRESS,
   ROBINHOOD_EXPLORER_URL,
   ROBINHOOD_RPC_URL,
+  ROBINHOOD_SOURCIFY_VERIFICATION_ID,
   addressExplorerUrl,
   getRobinhoodChainIdBySlug,
   isWalletOnWrongChain,
   resolveRobinhoodMarketAddress,
   resolveRobinhoodRpcUrl,
   robinhoodTestnet,
+  robinhoodTxUrl,
+  shortHash,
   shouldShowTokenFaucet,
+  sourcifyLookupUrl,
+  txExplorerUrl,
   validatedAddress,
 } from '../src/config/robinhood.ts'
 
@@ -56,6 +62,7 @@ test('Robinhood market resolution never falls back from an explicit invalid addr
 
 test('wrong-chain detection and explorer links are deterministic', () => {
   const address = '0x2222222222222222222222222222222222222222'
+  const tx = '0x0c3f6abb3db4415f9d628a135a2451aa87429a06d4ba852d0d462409ef73f0b2'
   assert.equal(isWalletOnWrongChain(false, 1, ROBINHOOD_CHAIN_ID), false)
   assert.equal(isWalletOnWrongChain(true, 1, ROBINHOOD_CHAIN_ID), true)
   assert.equal(isWalletOnWrongChain(true, ROBINHOOD_CHAIN_ID, ROBINHOOD_CHAIN_ID), false)
@@ -63,6 +70,12 @@ test('wrong-chain detection and explorer links are deterministic', () => {
     addressExplorerUrl(`${ROBINHOOD_EXPLORER_URL}/`, address),
     `${ROBINHOOD_EXPLORER_URL}/address/${address}`,
   )
+  assert.equal(txExplorerUrl(ROBINHOOD_EXPLORER_URL, tx), `${ROBINHOOD_EXPLORER_URL}/tx/${tx}`)
+  assert.equal(robinhoodTxUrl(tx), `${ROBINHOOD_EXPLORER_URL}/tx/${tx}`)
+  assert.equal(shortHash(tx), '0x0c3f…f0b2')
+  assert.equal(ROBINHOOD_EVENT_MARKET_V2_ADDRESS, '0x4F946Cca7f8da191168f76Fe12fbD6cfa1CAA26e')
+  assert.equal(ROBINHOOD_SOURCIFY_VERIFICATION_ID, 'e81be92a-9950-4d1e-a453-753456c39434')
+  assert.match(sourcifyLookupUrl(), /full_match\/46630\//)
 })
 
 test('real USDG routes never expose the mock-token faucet', () => {

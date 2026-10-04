@@ -18,7 +18,13 @@ const src = join(root, 'src')
 const ROUTE_SHELL = join(src, 'App.tsx')
 const ROBINHOOD_ROUTE_PAGE = join(src, 'pages', 'OddsShiftPage.tsx')
 const ENTRY = join(src, 'main.tsx')
-const EXTRA = ['vite.config.ts', 'eslint.config.js', 'scripts/lint-active.mjs', 'test/robinhood-config.test.ts']
+const EXTRA = [
+  'vite.config.ts',
+  'eslint.config.js',
+  'scripts/lint-active.mjs',
+  'test/robinhood-config.test.ts',
+  'test/robinhood-live-evidence.test.ts',
+]
 
 const IMPORT_RE =
   /(?:import|export)\s[^'"]*?from\s*['"]([^'"]+)['"]|import\s*['"]([^'"]+)['"]|import\(\s*['"]([^'"]+)['"]\s*\)/g
