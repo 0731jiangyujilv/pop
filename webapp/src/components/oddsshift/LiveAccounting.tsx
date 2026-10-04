@@ -26,11 +26,11 @@ function Metric({
 }
 
 export function LiveAccounting({ live }: { live: RobinhoodLiveState }) {
-  const trades = live.totalTrades ?? LIVE_ACCOUNTING.totalTrades
-  const shocks = live.totalShocks ?? LIVE_ACCOUNTING.totalShocks
-  const pending = live.unavailable ? LIVE_ACCOUNTING.pendingTrades : (live.pendingCount ?? LIVE_ACCOUNTING.pendingTrades)
-  const prob =
-    live.currentProbPercent ?? LIVE_MARKET.finalProbabilityPercent
+  const liveTrades = live.totalTrades
+  const liveShocks = live.totalShocks
+  const pending = live.unavailable
+    ? LIVE_ACCOUNTING.pendingTrades
+    : (live.pendingCount ?? LIVE_ACCOUNTING.pendingTrades)
 
   // Lifetime economics are immutable demo results; prefer evidence constants so
   // narration stays exact even if RPC formatting differs slightly.
@@ -54,17 +54,21 @@ export function LiveAccounting({ live }: { live: RobinhoodLiveState }) {
       <div className="rh-card-head">
         <div>
           <p className="rh-card-title" id="rh-accounting-title">
-            Live accounting
+            Captured demo run
           </p>
-          <h2 className="rh-card-h">What the settled demo produced</h2>
+          <h2 className="rh-card-h">Verified settlement snapshot</h2>
           <p className="rh-card-sub">
-            Headline counters refresh from the live contract when RPC is available. Lifetime fee
-            totals below are the verified settled-demo accounting.
+            Live counters above the fold come from the contract. The demo totals below (including
+            lifetime fees) are a <b>captured demo run</b> — not permanent live state after new
+            trades.
           </p>
+        </div>
+        <div className="rh-badge rh-badge-verify" role="status">
+          Verified settlement snapshot
         </div>
         {live.unavailable && (
           <div className="rh-status-warn" role="status">
-            Live state temporarily unavailable
+            Live state temporarily unavailable — showing captured snapshot values
           </div>
         )}
         {live.loading && !live.unavailable && (
@@ -75,10 +79,20 @@ export function LiveAccounting({ live }: { live: RobinhoodLiveState }) {
       </div>
 
       <div className="rh-metrics">
-        <Metric label="Trades" value={trades} />
-        <Metric label="Shocks" value={shocks} />
-        <Metric label="Pending" value={pending} tone="ok" />
-        <Metric label="Final YES probability" value={prob} decimals={2} suffix="%" tone="accent" />
+        <Metric label="Snapshot trades" value={LIVE_ACCOUNTING.totalTrades} />
+        <Metric label="Snapshot shocks" value={LIVE_ACCOUNTING.totalShocks} />
+        <Metric
+          label="Live pending"
+          value={live.unavailable ? LIVE_ACCOUNTING.pendingTrades : pending}
+          tone="ok"
+        />
+        <Metric
+          label="Snapshot YES probability"
+          value={LIVE_MARKET.finalProbabilityPercent}
+          decimals={2}
+          suffix="%"
+          tone="accent"
+        />
         <Metric label="Protection refunded" value={refunded} decimals={6} suffix=" USDG" tone="ok" />
         <Metric
           label="Toxic protection → LPs"
@@ -90,6 +104,16 @@ export function LiveAccounting({ live }: { live: RobinhoodLiveState }) {
         <Metric label="Base fees → LPs" value={base} decimals={6} suffix=" USDG" />
         <Metric label="Total LP payout" value={lp} decimals={6} suffix=" USDG" tone="accent" />
       </div>
+
+      {!live.unavailable && liveTrades !== undefined && (
+        <p className="rh-card-sub" style={{ marginTop: 12 }}>
+          Live contract now reports {liveTrades} trades · {liveShocks ?? '—'} shocks
+          {live.currentProbPercent !== undefined
+            ? ` · YES ${live.currentProbPercent.toFixed(2)}%`
+            : ''}
+          . Compare against the snapshot above.
+        </p>
+      )}
 
       <div className="rh-zero" aria-label="Zero liability status">
         <div className="rh-zero-item">

@@ -7,6 +7,8 @@
  */
 export const ODDS_SHIFT_CSS = `
 .popamm .os-wrap{padding:28px 18px 64px}
+.popamm .os-embedded{width:100%}
+.popamm .os-embedded .os-wrap{padding-bottom:28px}
 .popamm .os-stack{width:100%;max-width:1000px;display:flex;flex-direction:column;align-items:center}
 .popamm .os-brand{display:inline-flex;align-items:center;gap:8px;margin-bottom:14px;padding:6px 14px;border-radius:999px;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--pp-accent);background:rgba(255,51,95,.07);border:1px solid rgba(255,51,95,.18)}
 .popamm .os-hero{margin-bottom:14px}

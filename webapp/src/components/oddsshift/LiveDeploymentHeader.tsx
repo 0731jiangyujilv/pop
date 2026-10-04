@@ -50,15 +50,15 @@ export function LiveDeploymentHeader({
 
       {zeroLiability ? (
         <div className="rh-status-ok" role="status">
-          Settled demo evidence · zero pending liabilities
+          Captured demo run · verified settlement snapshot · zero pending liabilities
         </div>
       ) : liveUnavailable ? (
         <div className="rh-status-warn" role="status">
-          Live RPC temporarily unavailable — immutable settled evidence retained below
+          Live RPC temporarily unavailable — verified settlement snapshot retained below
         </div>
       ) : (
         <div className="rh-status-warn" role="status">
-          Live liabilities still open — compare against settled evidence carefully
+          Live liabilities still open — compare against the captured demo run carefully
         </div>
       )}
 
