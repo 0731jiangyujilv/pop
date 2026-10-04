@@ -38,6 +38,7 @@ import {
 } from '@/config/abi/eventMarketV2'
 import { ERC20_ABI } from '@/config/contracts'
 import { useWriteContractWithAttribution } from '@/hooks/useWriteContractWithAttribution'
+import { nextApprovalAmount } from '@/lib/usdgAllowance'
 import { POP_AMM_CSS } from './popAmmStyles'
 import { ODDS_SHIFT_CSS } from './oddsShiftStyles'
 
@@ -378,12 +379,13 @@ function OddsShiftMarketPage({
       functionName: 'allowance',
       args: [address, marketAddr],
     })) as bigint
-    if (allowance >= need) return
+    const approveAmount = nextApprovalAmount(allowance, need)
+    if (approveAmount === null) return
     const hash = await writeContractAsync({
       address: usdcAddr,
       abi: ERC20_ABI,
       functionName: 'approve',
-      args: [marketAddr, need],
+      args: [marketAddr, approveAmount],
       chainId,
     })
     await publicClient.waitForTransactionReceipt({ hash })

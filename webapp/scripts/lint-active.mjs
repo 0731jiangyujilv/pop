@@ -26,6 +26,7 @@ const EXTRA = [
   'test/robinhood-live-evidence.test.ts',
   'test/robinhood-judge-experience.test.ts',
   'test/robinhood-interactive.test.ts',
+  'test/usdg-allowance.test.ts',
 ]
 
 const IMPORT_RE =

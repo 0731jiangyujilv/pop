@@ -61,9 +61,10 @@ test('/robinhood reuses OddsShiftPage trading — no parallel /trade stack', () 
 test('OddsShift write path targets market address for buyYes/buyNo and USDG approve spender', () => {
   const os = readSrc('src/pages/OddsShiftPage.tsx')
 
-  // Approval spender is the market (EventMarketV2), exact amount.
+  // Approval spender is the market (EventMarketV2); amount is bounded via nextApprovalAmount.
   assert.match(os, /functionName: 'approve'/)
-  assert.match(os, /args: \[marketAddr, need\]/)
+  assert.match(os, /args: \[marketAddr, approveAmount\]/)
+  assert.match(os, /nextApprovalAmount/)
 
   // Buys target marketAddr with quote-derived minOut.
   assert.match(os, /functionName: side === 'YES' \? 'buyYes' : 'buyNo'/)
@@ -78,9 +79,11 @@ test('OddsShift write path targets market address for buyYes/buyNo and USDG appr
   assert.match(os, /Connect Wallet/)
   assert.match(os, /switchChain/)
 
-  // No private-key workflow.
+  // No private-key workflow / unlimited / Permit2.
   assert.equal(os.includes('PRIVATE_KEY'), false)
   assert.equal(os.includes('privateKeyToAccount'), false)
+  assert.equal(os.includes('MaxUint256'), false)
+  assert.equal(os.includes('Permit2'), false)
 })
 
 test('Robinhood page keeps evidence sections under the interactive market', () => {
