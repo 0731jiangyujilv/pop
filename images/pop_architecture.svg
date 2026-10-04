@@ -1,0 +1,307 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="820" viewBox="0 0 1600 820">
+<defs>
+<marker id="ab" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#0969da"/></marker>
+<marker id="ap" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#8250df"/></marker>
+<marker id="ag" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1a7f37"/></marker>
+<marker id="ar" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#cf222e"/></marker>
+</defs>
+<rect width="1600" height="820" fill="#ffffff"/>
+<rect x="30" y="30" width="340" height="680" rx="14" fill="#f6f8fa" stroke="#d0d7de" stroke-width="1"/>
+<rect x="30" y="30" width="340" height="4" rx="2" fill="#0969da"/>
+<rect x="48" y="50" width="44" height="26" rx="13" fill="#ddf4ff" stroke="#0969da" stroke-width="1"/>
+<text x="70" y="68" font-family="ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,&quot;Liberation Mono&quot;,monospace" font-size="12.2" font-weight="700" fill="#0969da" text-anchor="middle" letter-spacing="0">
+<tspan x="70" dy="0">01</tspan>
+</text>
+<text x="106" y="67" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="21" font-weight="650" fill="#1f2328" text-anchor="start" letter-spacing="0">
+<tspan x="106" dy="0">Market Entry</tspan>
+</text>
+<text x="106" y="89" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="10.8" font-weight="650" fill="#6e7781" text-anchor="start" letter-spacing="1.15">
+<tspan x="106" dy="0">SOCIAL + INTENT</tspan>
+</text>
+<rect x="390" y="30" width="340" height="680" rx="14" fill="#f6f8fa" stroke="#d0d7de" stroke-width="1"/>
+<rect x="390" y="30" width="340" height="4" rx="2" fill="#8250df"/>
+<rect x="408" y="50" width="44" height="26" rx="13" fill="#fbefff" stroke="#8250df" stroke-width="1"/>
+<text x="430" y="68" font-family="ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,&quot;Liberation Mono&quot;,monospace" font-size="12.2" font-weight="700" fill="#8250df" text-anchor="middle" letter-spacing="0">
+<tspan x="430" dy="0">02</tspan>
+</text>
+<text x="466" y="67" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="21" font-weight="650" fill="#1f2328" text-anchor="start" letter-spacing="0">
+<tspan x="466" dy="0">Funding + Routing</tspan>
+</text>
+<text x="466" y="89" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="10.8" font-weight="650" fill="#6e7781" text-anchor="start" letter-spacing="1.15">
+<tspan x="466" dy="0">LIQUIDITY ONBOARDING</tspan>
+</text>
+<rect x="750" y="30" width="480" height="680" rx="14" fill="#f6f8fa" stroke="#d0d7de" stroke-width="1"/>
+<rect x="750" y="30" width="480" height="4" rx="2" fill="#1a7f37"/>
+<rect x="768" y="50" width="44" height="26" rx="13" fill="#dafbe1" stroke="#1a7f37" stroke-width="1"/>
+<text x="790" y="68" font-family="ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,&quot;Liberation Mono&quot;,monospace" font-size="12.2" font-weight="700" fill="#1a7f37" text-anchor="middle" letter-spacing="0">
+<tspan x="790" dy="0">03</tspan>
+</text>
+<text x="826" y="67" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="21" font-weight="650" fill="#1f2328" text-anchor="start" letter-spacing="0">
+<tspan x="826" dy="0">POP AMM on Robinhood</tspan>
+</text>
+<text x="826" y="89" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="10.8" font-weight="650" fill="#6e7781" text-anchor="start" letter-spacing="1.15">
+<tspan x="826" dy="0">MARKET CREATION + LIVE TRADING</tspan>
+</text>
+<rect x="1250" y="30" width="320" height="680" rx="14" fill="#f6f8fa" stroke="#d0d7de" stroke-width="1"/>
+<rect x="1250" y="30" width="320" height="4" rx="2" fill="#cf222e"/>
+<rect x="1268" y="50" width="44" height="26" rx="13" fill="#ffebe9" stroke="#cf222e" stroke-width="1"/>
+<text x="1290" y="68" font-family="ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,&quot;Liberation Mono&quot;,monospace" font-size="12.2" font-weight="700" fill="#cf222e" text-anchor="middle" letter-spacing="0">
+<tspan x="1290" dy="0">04</tspan>
+</text>
+<text x="1326" y="67" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="21" font-weight="650" fill="#1f2328" text-anchor="start" letter-spacing="0">
+<tspan x="1326" dy="0">Oracle + Settlement</tspan>
+</text>
+<text x="1326" y="89" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="10.8" font-weight="650" fill="#6e7781" text-anchor="start" letter-spacing="1.15">
+<tspan x="1326" dy="0">TRUSTED OUTCOMES</tspan>
+</text>
+<rect x="48" y="118" width="304" height="96" rx="10" fill="#ffffff" stroke="#d0d7de" stroke-width="1"/>
+<rect x="48" y="118" width="3" height="96" rx="2" fill="#0969da"/>
+<text x="66" y="145" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="16" font-weight="650" fill="#1f2328" text-anchor="start" letter-spacing="0">
+<tspan x="66" dy="0">Users / X / Frontend</tspan>
+</text>
+<text x="66" y="170" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="14.2" font-weight="400" fill="#656d76" text-anchor="start" letter-spacing="0">
+<tspan x="66" dy="0">Create or join a market</tspan>
+<tspan x="66" dy="19">Tag @POP around an event</tspan>
+</text>
+<rect x="48" y="230" width="304" height="96" rx="10" fill="#ffffff" stroke="#d0d7de" stroke-width="1"/>
+<rect x="48" y="230" width="3" height="96" rx="2" fill="#0969da"/>
+<text x="66" y="257" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="16" font-weight="650" fill="#1f2328" text-anchor="start" letter-spacing="0">
+<tspan x="66" dy="0">Live Disagreement</tspan>
+</text>
+<text x="66" y="282" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="14.2" font-weight="400" fill="#656d76" text-anchor="start" letter-spacing="0">
+<tspan x="66" dy="0">Debates · rival views</tspan>
+<tspan x="66" dy="19">breaking moments</tspan>
+</text>
+<rect x="48" y="342" width="304" height="96" rx="10" fill="#ffffff" stroke="#d0d7de" stroke-width="1"/>
+<rect x="48" y="342" width="3" height="96" rx="2" fill="#0969da"/>
+<text x="66" y="369" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="16" font-weight="650" fill="#1f2328" text-anchor="start" letter-spacing="0">
+<tspan x="66" dy="0">Intent Parser</tspan>
+</text>
+<text x="66" y="394" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="14.2" font-weight="400" fill="#656d76" text-anchor="start" letter-spacing="0">
+<tspan x="66" dy="0">Extracts question · side</tspan>
+<tspan x="66" dy="19">size · timing</tspan>
+</text>
+<rect x="48" y="454" width="304" height="96" rx="10" fill="#ffffff" stroke="#d0d7de" stroke-width="1"/>
+<rect x="48" y="454" width="3" height="96" rx="2" fill="#0969da"/>
+<text x="66" y="481" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="16" font-weight="650" fill="#1f2328" text-anchor="start" letter-spacing="0">
+<tspan x="66" dy="0">Wallet + Intent</tspan>
+</text>
+<text x="66" y="506" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="14.2" font-weight="400" fill="#656d76" text-anchor="start" letter-spacing="0">
+<tspan x="66" dy="0">Choose side · size · sign</tspan>
+<tspan x="66" dy="19">Approvals · signatures</tspan>
+</text>
+<line x1="200" y1="214" x2="200" y2="230" stroke="#0969da" stroke-width="1.5" stroke-linecap="round" marker-end="url(#ab)"/>
+<line x1="200" y1="326" x2="200" y2="342" stroke="#0969da" stroke-width="1.5" stroke-linecap="round" marker-end="url(#ab)"/>
+<line x1="200" y1="438" x2="200" y2="454" stroke="#0969da" stroke-width="1.5" stroke-linecap="round" marker-end="url(#ab)"/>
+<rect x="74" y="592" width="252" height="34" rx="17" fill="#ddf4ff" stroke="#0969da" stroke-width="1"/>
+<text x="200" y="613" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="11.7" font-weight="650" fill="#0969da" text-anchor="middle" letter-spacing="0">
+<tspan x="200" dy="0">From disagreement to market intent</tspan>
+</text>
+<rect x="408" y="118" width="304" height="96" rx="10" fill="#ffffff" stroke="#d0d7de" stroke-width="1"/>
+<rect x="408" y="118" width="3" height="96" rx="2" fill="#8250df"/>
+<text x="426" y="145" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="16" font-weight="650" fill="#1f2328" text-anchor="start" letter-spacing="0">
+<tspan x="426" dy="0">Deposit Asset or USDG</tspan>
+</text>
+<text x="426" y="170" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="14.2" font-weight="400" fill="#656d76" text-anchor="start" letter-spacing="0">
+<tspan x="426" dy="0">Add collateral to participate</tspan>
+<tspan x="426" dy="19">ETH · stablecoins · USDG</tspan>
+</text>
+<rect x="408" y="230" width="304" height="122" rx="10" fill="#ffffff" stroke="#d0d7de" stroke-width="1"/>
+<rect x="408" y="230" width="3" height="122" rx="2" fill="#8250df"/>
+<text x="426" y="257" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="16" font-weight="650" fill="#1f2328" text-anchor="start" letter-spacing="0">
+<tspan x="426" dy="0">Uniswap Routing / Trading API</tspan>
+</text>
+<text x="426" y="282" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="14.2" font-weight="400" fill="#656d76" text-anchor="start" letter-spacing="0">
+<tspan x="426" dy="0">Quote · route · approve · swap</tspan>
+<tspan x="426" dy="19">Best path into Robinhood-native USDG</tspan>
+</text>
+<rect x="408" y="368" width="304" height="96" rx="10" fill="#ffffff" stroke="#d0d7de" stroke-width="1"/>
+<rect x="408" y="368" width="3" height="96" rx="2" fill="#8250df"/>
+<text x="426" y="395" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="16" font-weight="650" fill="#1f2328" text-anchor="start" letter-spacing="0">
+<tspan x="426" dy="0">Funding State</tspan>
+</text>
+<text x="426" y="420" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="14.2" font-weight="400" fill="#656d76" text-anchor="start" letter-spacing="0">
+<tspan x="426" dy="0">Receipts · approvals · balances</tspan>
+<tspan x="426" dy="19">Failure handling · idempotency</tspan>
+</text>
+<line x1="560" y1="214" x2="560" y2="230" stroke="#8250df" stroke-width="1.5" stroke-linecap="round" marker-end="url(#ap)"/>
+<line x1="560" y1="352" x2="560" y2="368" stroke="#8250df" stroke-width="1.5" stroke-linecap="round" marker-end="url(#ap)"/>
+<rect x="455" y="520" width="210" height="34" rx="17" fill="#fbefff" stroke="#8250df" stroke-width="1"/>
+<text x="560" y="541" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="11.7" font-weight="650" fill="#8250df" text-anchor="middle" letter-spacing="0">
+<tspan x="560" dy="0">Uniswap-like simplicity</tspan>
+</text>
+<text x="560" y="585" font-family="ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,&quot;Liberation Mono&quot;,monospace" font-size="11.2" font-weight="600" fill="#6e7781" text-anchor="middle" letter-spacing="0">
+<tspan x="560" dy="0">route → collateral → ready</tspan>
+</text>
+<rect x="768" y="118" width="444" height="82" rx="10" fill="#ffffff" stroke="#d0d7de" stroke-width="1"/>
+<rect x="768" y="118" width="3" height="82" rx="2" fill="#1a7f37"/>
+<text x="786" y="145" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="16" font-weight="650" fill="#1f2328" text-anchor="start" letter-spacing="0">
+<tspan x="786" dy="0">Market Factory / Robinhood App Layer</tspan>
+</text>
+<text x="786" y="170" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="14" font-weight="400" fill="#656d76" text-anchor="start" letter-spacing="0">
+<tspan x="786" dy="0">Create market · define question · open trading</tspan>
+</text>
+<rect x="768" y="216" width="300" height="220" rx="10" fill="#ffffff" stroke="#d0d7de" stroke-width="1"/>
+<rect x="768" y="216" width="3" height="220" rx="2" fill="#1a7f37"/>
+<text x="786" y="246" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="17.5" font-weight="650" fill="#1f2328" text-anchor="start" letter-spacing="0">
+<tspan x="786" dy="0">POP YES / NO Pool</tspan>
+</text>
+<circle cx="788" cy="277" r="3.5" fill="#1a7f37"/>
+<text x="802" y="282" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="14.0" font-weight="400" fill="#1f2328" text-anchor="start" letter-spacing="0">
+<tspan x="802" dy="0">1 USDG → 1 YES + 1 NO</tspan>
+</text>
+<circle cx="788" cy="305" r="3.5" fill="#1a7f37"/>
+<text x="802" y="310" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="14.0" font-weight="400" fill="#1f2328" text-anchor="start" letter-spacing="0">
+<tspan x="802" dy="0">YES reserve × NO reserve = k</tspan>
+</text>
+<circle cx="788" cy="333" r="3.5" fill="#1a7f37"/>
+<text x="802" y="338" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="14.0" font-weight="400" fill="#1f2328" text-anchor="start" letter-spacing="0">
+<tspan x="802" dy="0">Buy YES: keep YES,</tspan>
+</text>
+<text x="802" y="366" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="14.0" font-weight="400" fill="#1f2328" text-anchor="start" letter-spacing="0">
+<tspan x="802" dy="0">swap NO for more YES</tspan>
+</text>
+<circle cx="788" cy="389" r="3.5" fill="#1a7f37"/>
+<text x="802" y="394" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="14.0" font-weight="400" fill="#1f2328" text-anchor="start" letter-spacing="0">
+<tspan x="802" dy="0">Buy NO: keep NO,</tspan>
+</text>
+<text x="802" y="422" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="14.0" font-weight="400" fill="#1f2328" text-anchor="start" letter-spacing="0">
+<tspan x="802" dy="0">swap YES for more NO</tspan>
+</text>
+<rect x="1084" y="216" width="128" height="220" rx="10" fill="#ffffff" stroke="#d0d7de" stroke-width="1"/>
+<rect x="1084" y="216" width="3" height="220" rx="2" fill="#1a7f37"/>
+<text x="1102" y="243" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="16" font-weight="650" fill="#1f2328" text-anchor="start" letter-spacing="0">
+<tspan x="1102" dy="0">Arbitrage Flow</tspan>
+</text>
+<text x="1102" y="268" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="12.8" font-weight="400" fill="#656d76" text-anchor="start" letter-spacing="0">
+<tspan x="1102" dy="0">Connects POP</tspan>
+<tspan x="1102" dy="19">to external</tspan>
+<tspan x="1102" dy="19">markets</tspan>
+<tspan x="1102" dy="19"></tspan>
+<tspan x="1102" dy="19">Keeps prices</tspan>
+<tspan x="1102" dy="19">efficient</tspan>
+</text>
+<rect x="768" y="448" width="444" height="34" rx="8" fill="#dafbe1" stroke="#1a7f37" stroke-width="1"/>
+<text x="786" y="470" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="12.8" font-weight="700" fill="#1a7f37" text-anchor="start" letter-spacing="0">
+<tspan x="786" dy="0">Live probability</tspan>
+</text>
+<text x="900" y="470" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="12.2" font-weight="500" fill="#656d76" text-anchor="start" letter-spacing="0">
+<tspan x="900" dy="0">derived from current AMM state</tspan>
+</text>
+<rect x="768" y="500" width="212" height="88" rx="10" fill="#ffffff" stroke="#d0d7de" stroke-width="1"/>
+<rect x="768" y="500" width="3" height="88" rx="2" fill="#1a7f37"/>
+<text x="786" y="527" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="16" font-weight="650" fill="#1f2328" text-anchor="start" letter-spacing="0">
+<tspan x="786" dy="0">Bootstrap Liquidity</tspan>
+</text>
+<text x="786" y="552" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="13.0" font-weight="400" fill="#656d76" text-anchor="start" letter-spacing="0">
+<tspan x="786" dy="0">Protocol / official LP</tspan>
+<tspan x="786" dy="19">for cold start</tspan>
+</text>
+<rect x="1000" y="500" width="212" height="88" rx="10" fill="#ffffff" stroke="#d0d7de" stroke-width="1"/>
+<rect x="1000" y="500" width="3" height="88" rx="2" fill="#1a7f37"/>
+<text x="1018" y="527" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="16" font-weight="650" fill="#1f2328" text-anchor="start" letter-spacing="0">
+<tspan x="1018" dy="0">Real LPs + Traders</tspan>
+</text>
+<text x="1018" y="552" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="13.0" font-weight="400" fill="#656d76" text-anchor="start" letter-spacing="0">
+<tspan x="1018" dy="0">Users add liquidity</tspan>
+<tspan x="1018" dy="19">and trade</tspan>
+</text>
+<line x1="873" y1="482" x2="873" y2="500" stroke="#1a7f37" stroke-width="1.4" stroke-linecap="round" marker-end="url(#ag)"/>
+<line x1="1106" y1="482" x2="1106" y2="500" stroke="#1a7f37" stroke-width="1.4" stroke-linecap="round" marker-end="url(#ag)"/>
+<rect x="768" y="600" width="444" height="74" rx="10" fill="#ffffff" stroke="#d0d7de" stroke-width="1"/>
+<rect x="768" y="600" width="3" height="74" rx="2" fill="#1a7f37"/>
+<text x="786" y="624" font-family="ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,&quot;Liberation Mono&quot;,monospace" font-size="13.6" font-weight="700" fill="#1a7f37" text-anchor="start" letter-spacing="0">
+<tspan x="786" dy="0">OddsShift · Uniswap v4 Hook</tspan>
+</text>
+<text x="786" y="647" font-family="ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,&quot;Liberation Mono&quot;,monospace" font-size="12.0" font-weight="500" fill="#656d76" text-anchor="start" letter-spacing="0">
+<tspan x="786" dy="0">conditional fee → escrow</tspan>
+<tspan x="786" dy="17">persist: LPs · reverse: trader rebate</tspan>
+</text>
+<rect x="1268" y="118" width="284" height="92" rx="10" fill="#ffffff" stroke="#d0d7de" stroke-width="1"/>
+<rect x="1268" y="118" width="3" height="92" rx="2" fill="#cf222e"/>
+<text x="1286" y="145" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="16" font-weight="650" fill="#1f2328" text-anchor="start" letter-spacing="0">
+<tspan x="1286" dy="0">Outcome Source + Finalization</tspan>
+</text>
+<text x="1286" y="170" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="13.0" font-weight="400" fill="#656d76" text-anchor="start" letter-spacing="0">
+<tspan x="1286" dy="0">Verified outcome and final result</tspan>
+<tspan x="1286" dy="19">Oracle / API / attestation</tspan>
+</text>
+<rect x="1268" y="226" width="284" height="108" rx="10" fill="#ffffff" stroke="#d0d7de" stroke-width="1"/>
+<rect x="1268" y="226" width="3" height="108" rx="2" fill="#cf222e"/>
+<text x="1286" y="253" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="16" font-weight="650" fill="#1f2328" text-anchor="start" letter-spacing="0">
+<tspan x="1286" dy="0">Chainlink CRE / Oracle Workflow</tspan>
+</text>
+<text x="1286" y="278" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="13.0" font-weight="400" fill="#656d76" text-anchor="start" letter-spacing="0">
+<tspan x="1286" dy="0">Verifies result and triggers</tspan>
+<tspan x="1286" dy="19">state-changing settlement</tspan>
+</text>
+<rect x="1268" y="350" width="284" height="92" rx="10" fill="#ffffff" stroke="#d0d7de" stroke-width="1"/>
+<rect x="1268" y="350" width="3" height="92" rx="2" fill="#cf222e"/>
+<text x="1286" y="377" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="16" font-weight="650" fill="#1f2328" text-anchor="start" letter-spacing="0">
+<tspan x="1286" dy="0">Redeem Winning Side</tspan>
+</text>
+<text x="1286" y="402" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="13.4" font-weight="400" fill="#656d76" text-anchor="start" letter-spacing="0">
+<tspan x="1286" dy="0">1 winning share = 1 USDG</tspan>
+</text>
+<rect x="1268" y="458" width="284" height="96" rx="10" fill="#ffffff" stroke="#d0d7de" stroke-width="1"/>
+<rect x="1268" y="458" width="3" height="96" rx="2" fill="#cf222e"/>
+<text x="1286" y="485" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="16" font-weight="650" fill="#1f2328" text-anchor="start" letter-spacing="0">
+<tspan x="1286" dy="0">Treasury + Accounting</tspan>
+</text>
+<text x="1286" y="510" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="13.0" font-weight="400" fill="#656d76" text-anchor="start" letter-spacing="0">
+<tspan x="1286" dy="0">Claims · fees · receipts</tspan>
+<tspan x="1286" dy="19">Audit trail · reconciliation</tspan>
+</text>
+<line x1="1410" y1="210" x2="1410" y2="226" stroke="#cf222e" stroke-width="1.5" stroke-linecap="round" marker-end="url(#ar)"/>
+<line x1="1410" y1="334" x2="1410" y2="350" stroke="#cf222e" stroke-width="1.5" stroke-linecap="round" marker-end="url(#ar)"/>
+<line x1="1410" y1="442" x2="1410" y2="458" stroke="#cf222e" stroke-width="1.5" stroke-linecap="round" marker-end="url(#ar)"/>
+<rect x="1302" y="594" width="216" height="34" rx="17" fill="#ffebe9" stroke="#cf222e" stroke-width="1"/>
+<text x="1410" y="615" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="11.7" font-weight="650" fill="#cf222e" text-anchor="middle" letter-spacing="0">
+<tspan x="1410" dy="0">Resolve → redeem → account</tspan>
+</text>
+<line x1="370" y1="395" x2="390" y2="395" stroke="#0969da" stroke-width="2" stroke-linecap="round" marker-end="url(#ab)"/>
+<line x1="730" y1="395" x2="750" y2="395" stroke="#8250df" stroke-width="2" stroke-linecap="round" marker-end="url(#ap)"/>
+<line x1="1230" y1="395" x2="1250" y2="395" stroke="#1a7f37" stroke-width="2" stroke-linecap="round" marker-end="url(#ag)"/>
+<line x1="712" y1="304" x2="768" y2="304" stroke="#8250df" stroke-width="1.15" stroke-linecap="round" stroke-dasharray="5 5" marker-end="url(#ap)"/>
+<text x="740" y="291" font-family="ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,&quot;Liberation Mono&quot;,monospace" font-size="10.5" font-weight="650" fill="#8250df" text-anchor="middle" letter-spacing="0">
+<tspan x="740" dy="0">USDG</tspan>
+</text>
+<line x1="1212" y1="330" x2="1268" y2="330" stroke="#1a7f37" stroke-width="1.15" stroke-linecap="round" stroke-dasharray="5 5" marker-end="url(#ag)"/>
+<text x="1240" y="317" font-family="ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,&quot;Liberation Mono&quot;,monospace" font-size="10.2" font-weight="650" fill="#1a7f37" text-anchor="middle" letter-spacing="0">
+<tspan x="1240" dy="0">market state</tspan>
+</text>
+<rect x="30" y="744" width="1540" height="42" rx="9" fill="#f6f8fa" stroke="#d0d7de" stroke-width="1"/>
+<text x="120" y="770" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="12.1" font-weight="600" fill="#1f2328" text-anchor="middle" letter-spacing="0">
+<tspan x="120" dy="0">X / Conversation</tspan>
+</text>
+<text x="235.0" y="770" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="16" font-weight="600" fill="#656d76" text-anchor="middle" letter-spacing="0">
+<tspan x="235.0" dy="0">›</tspan>
+</text>
+<text x="350" y="770" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="12.1" font-weight="600" fill="#1f2328" text-anchor="middle" letter-spacing="0">
+<tspan x="350" dy="0">Market Intent</tspan>
+</text>
+<text x="470.0" y="770" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="16" font-weight="600" fill="#656d76" text-anchor="middle" letter-spacing="0">
+<tspan x="470.0" dy="0">›</tspan>
+</text>
+<text x="590" y="770" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="12.1" font-weight="600" fill="#1f2328" text-anchor="middle" letter-spacing="0">
+<tspan x="590" dy="0">Funding + Routing</tspan>
+</text>
+<text x="717.5" y="770" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="16" font-weight="600" fill="#656d76" text-anchor="middle" letter-spacing="0">
+<tspan x="717.5" dy="0">›</tspan>
+</text>
+<text x="845" y="770" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="12.1" font-weight="600" fill="#1f2328" text-anchor="middle" letter-spacing="0">
+<tspan x="845" dy="0">POP AMM</tspan>
+</text>
+<text x="970.0" y="770" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="16" font-weight="600" fill="#656d76" text-anchor="middle" letter-spacing="0">
+<tspan x="970.0" dy="0">›</tspan>
+</text>
+<text x="1095" y="770" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="12.1" font-weight="600" fill="#1f2328" text-anchor="middle" letter-spacing="0">
+<tspan x="1095" dy="0">Oracle + Settlement</tspan>
+</text>
+<text x="1247.5" y="770" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="16" font-weight="600" fill="#656d76" text-anchor="middle" letter-spacing="0">
+<tspan x="1247.5" dy="0">›</tspan>
+</text>
+<text x="1400" y="770" font-family="ui-sans-serif,-apple-system,BlinkMacSystemFont,&quot;Segoe UI&quot;,Helvetica,Arial,sans-serif" font-size="12.1" font-weight="600" fill="#1f2328" text-anchor="middle" letter-spacing="0">
+<tspan x="1400" dy="0">Treasury</tspan>
+</text>
+</svg>
