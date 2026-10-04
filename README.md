@@ -6,7 +6,7 @@ POP brings Uniswap-style continuous liquidity to prediction markets.
 
 Instead of relying on an order book and dedicated market makers, POP lets users trade **YES / NO outcomes against onchain AMM liquidity**, turning market prices into continuously updating probabilities.
 
-**[Live Demo](https://populab.xyz/robinhood)** · **[OddsShift](./oddsshift.md)**
+**Live Demo:** https://populab.xyz/robinhood
 
 For **Arbitrum Open House Singapore 2026**, POP is deployed on **Robinhood Chain Testnet** with **USDG** as its collateral and settlement asset, together with **OddsShift**, a conditional fee-rebate mechanism designed to protect passive liquidity during information shocks.
 
