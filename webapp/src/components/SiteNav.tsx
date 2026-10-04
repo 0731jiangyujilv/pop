@@ -12,6 +12,7 @@ type NavItem = { label: string; to?: string; href?: string }
 const NAV_ITEMS: NavItem[] = [
   // { label: 'Trade', to: '/' },
   // { label: 'FIFA 2026', to: '/' },
+  { label: 'OddsShift', to: '/robinhood' },
   { label: 'Crypto', to: '/crypto' },
   { label: 'Fed', to: '/fed' },
   { label: 'Midterms', to: '/midterm' },

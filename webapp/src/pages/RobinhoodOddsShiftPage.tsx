@@ -55,8 +55,9 @@ export function RobinhoodOddsShiftPage() {
 
 function RobinhoodEvidenceExperience({ marketAddr }: { marketAddr: `0x${string}` }) {
   const live = useRobinhoodLiveState(marketAddr)
-  const zeroLiability =
-    live.zeroLiabilityLive === true || (live.unavailable && isZeroLiability()) || isZeroLiability()
+  // Prefer live zero-liability when RPC succeeds; otherwise the immutable
+  // settled-demo evidence remains the credibility signal for judges.
+  const zeroLiability = live.zeroLiabilityLive ?? isZeroLiability()
 
   return (
     <div className="popamm">

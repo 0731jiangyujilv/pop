@@ -194,10 +194,10 @@ function FedCard({ m }: { m: FedMarket }) {
 function OddsShiftHookLink() {
   return (
     <Link
-      to="/hook"
+      to="/robinhood"
       className="block rounded-[10px] border-[1.5px] border-[rgba(255,51,95,0.35)] bg-[rgba(255,51,95,0.03)] px-5 py-4 text-center text-[15px] font-semibold text-[#FF335F] transition hover:border-[rgba(255,51,95,0.6)] hover:bg-[rgba(255,51,95,0.07)]"
     >
-      Try OddsShift Hook --&gt;
+      View OddsShift live evidence --&gt;
     </Link>
   )
 }
