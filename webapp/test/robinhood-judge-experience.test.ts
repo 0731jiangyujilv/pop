@@ -30,17 +30,20 @@ function readSrc(...parts: string[]): string {
   return readFileSync(join(root, ...parts), 'utf8')
 }
 
-test('judge page is read-only: no transaction-execution controls', () => {
+test('evidence sections stay narrative-only; trading is delegated to OddsShiftPage', () => {
   const page = readSrc('src/pages/RobinhoodOddsShiftPage.tsx')
   const scenario = readSrc('src/components/oddsshift/ScenarioCards.tsx')
   const header = readSrc('src/components/oddsshift/LiveDeploymentHeader.tsx')
   const evidence = readSrc('src/components/oddsshift/EvidenceExplorer.tsx')
-  const bundle = [page, scenario, header, evidence].join('\n')
+  const evidenceBundle = [scenario, header, evidence].join('\n')
+
+  // Interactive trading is reused from OddsShiftPage — not reimplemented here.
+  assert.match(page, /OddsShiftPage/)
+  assert.match(page, /ROBINHOOD_ODDS_SHIFT_DEPLOYMENT/)
+  assert.match(page, /embedded/)
 
   for (const banned of [
-    'writeContract',
     'writeContractAsync',
-    'useWriteContract',
     "functionName: 'buyYes'",
     "functionName: 'buyNo'",
     "functionName: 'claimRebate'",
@@ -50,12 +53,14 @@ test('judge page is read-only: no transaction-execution controls', () => {
     'Run Demo',
     'FAUCET_ABI',
   ]) {
-    assert.equal(bundle.includes(banned), false, `unexpected write control: ${banned}`)
+    assert.equal(evidenceBundle.includes(banned), false, `unexpected write control: ${banned}`)
+    // Page itself must not invent a parallel write path.
+    assert.equal(page.includes(banned), false, `page must not inline ${banned}`)
   }
 
   // Narrative may mention resolveStale as historical evidence, but must not invoke it.
   assert.match(readSrc('src/data/robinhoodLiveEvidence.ts'), /Permissionless resolveStale/)
-  assert.equal(bundle.includes('onClick={() => write'), false)
+  assert.equal(evidenceBundle.includes('onClick={() => write'), false)
 
   // Explorer actions must be ordinary links, not write buttons.
   assert.match(scenario, /View Shock Tx/)
@@ -96,8 +101,9 @@ test('accessibility labels cover primary judge actions and sections', () => {
   assert.match(header, /role="status"/)
   assert.match(accounting, /aria-label="Zero liability status"/)
   assert.match(mechanism, /aria-label="OddsShift fee flow"/)
-  assert.match(page, /<main className="rh-wrap">/)
-  assert.match(page, /no wallet required/i)
+  assert.match(page, /rh-wrap/)
+  assert.match(page, /Verified settlement snapshot/)
+  assert.match(page, /Captured demo run/)
 })
 
 test('responsive evidence cards use stacked layouts under narrow breakpoints', () => {
