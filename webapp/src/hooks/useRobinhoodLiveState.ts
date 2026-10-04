@@ -3,7 +3,6 @@
  * Never writes, never requires a connected wallet.
  */
 import { useMemo } from 'react'
-import { formatUnits } from 'viem'
 import { useReadContracts } from 'wagmi'
 import {
   EVENT_MARKET_V2_ABI,
@@ -16,7 +15,10 @@ import {
   ROBINHOOD_EVENT_MARKET_V2_ADDRESS,
   validatedAddress,
 } from '@/config/robinhood'
-import { LIVE_ACCOUNTING, LIVE_MARKET } from '@/data/robinhoodLiveEvidence'
+import { LIVE_MARKET } from '@/data/robinhoodLiveEvidence'
+import { formatLiveUsdg, settledEvidenceFallback } from '@/lib/robinhoodLiveFormat'
+
+export { formatLiveUsdg, settledEvidenceFallback }
 
 export type RobinhoodLiveState = {
   /** True while the first successful read has not landed. */
@@ -36,16 +38,6 @@ export type RobinhoodLiveState = {
   cumChargedFeeUsdg: string | undefined
   cumRebatedUsdg: string | undefined
   zeroLiabilityLive: boolean | undefined
-}
-
-/** Normalize USDG amount for display; keep integer zero as `"0"`. */
-export function formatLiveUsdg(v: bigint | undefined): string | undefined {
-  if (v === undefined) return undefined
-  if (v === 0n) return '0'
-  const raw = formatUnits(v, 6)
-  const n = Number(raw)
-  if (!Number.isFinite(n)) return raw
-  return n.toFixed(6).replace(/\.?0+$/, '')
 }
 
 export function useRobinhoodLiveState(
@@ -122,12 +114,4 @@ export function useRobinhoodLiveState(
       zeroLiabilityLive,
     }
   }, [enabled, reads.data, reads.isError, reads.isFetched, reads.isLoading])
-}
-
-/** Static fallback copy when live RPC is unavailable — never fabricate live zeroes. */
-export function settledEvidenceFallback() {
-  return {
-    ...LIVE_ACCOUNTING,
-    note: 'Live RPC unavailable — showing immutable settled-demo evidence.',
-  }
 }

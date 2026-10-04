@@ -24,6 +24,7 @@ const EXTRA = [
   'scripts/lint-active.mjs',
   'test/robinhood-config.test.ts',
   'test/robinhood-live-evidence.test.ts',
+  'test/robinhood-judge-experience.test.ts',
 ]
 
 const IMPORT_RE =
