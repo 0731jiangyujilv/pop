@@ -1,11 +1,22 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { useAccount, useChainId, usePublicClient, useReadContracts, useSwitchChain } from 'wagmi'
-import { formatUnits, parseUnits, type Address, type Chain } from 'viem'
+import {
+  useAccount,
+  useChainId,
+  useConnect,
+  usePublicClient,
+  useReadContracts,
+  useSwitchChain,
+} from 'wagmi'
+import { formatUnits, parseUnits, type Address } from 'viem'
 import { SiteNav } from '@/components/SiteNav'
 import { TxToast } from '@/components/TxToast'
 // import { InfoTooltip } from '@/components/InfoTooltip'
-import { arcTestnet, getChainConfig } from '@/config/chains'
+import { getChainConfig } from '@/config/chains'
+import {
+  ARC_ODDS_SHIFT_DEPLOYMENT,
+  type OddsShiftDeployment,
+} from '@/config/oddsShiftDeployments'
 import {
   addressExplorerUrl,
   isWalletOnWrongChain,
@@ -63,22 +74,6 @@ type Side = 'YES' | 'NO'
 /** A trade plus its on-chain id — `getTrades(0, …)` returns them in id order. */
 type IdTrade = OddsShiftTrade & { id: number }
 
-export type OddsShiftDeployment = {
-  chain: Chain
-  defaultMarketAddress?: string
-  expectedCollateralAddress?: Address
-  expectedCollateralSymbol?: string
-  faucetEnabled: boolean
-  routeLabel: string
-}
-
-const ARC_ODDS_SHIFT_DEPLOYMENT: OddsShiftDeployment = {
-  chain: arcTestnet,
-  defaultMarketAddress: '0x618689f025C862Fa0D2570ECc0eD5F4b72725d33',
-  faucetEnabled: true,
-  routeLabel: 'Arc OddsShift',
-}
-
 /** How the four terminal verdicts (plus Pending) read in the UI. */
 const OUTCOME_META: Record<number, { label: string; cls: string }> = {
   [TradeOutcome.Pending]: { label: 'escrowed', cls: 'os-badge-neutral' },
@@ -104,25 +99,42 @@ const OUTCOME_META: Record<number, { label: string; cls: string }> = {
  */
 export function OddsShiftPage({
   deployment = ARC_ODDS_SHIFT_DEPLOYMENT,
+  embedded = false,
+  marketAddress,
 }: {
   deployment?: OddsShiftDeployment
+  /** When true, omit SiteNav / page chrome so a parent route can compose evidence below. */
+  embedded?: boolean
+  /** Optional explicit market; otherwise path param then deployment default. */
+  marketAddress?: string
 }) {
   const { contractAddress } = useParams<{ contractAddress: string }>()
-  const marketAddr = resolveRobinhoodMarketAddress(contractAddress, deployment.defaultMarketAddress)
+  const marketAddr = resolveRobinhoodMarketAddress(
+    marketAddress ?? contractAddress,
+    deployment.defaultMarketAddress,
+  )
 
   if (!marketAddr) {
-    return <OddsShiftUnavailable deployment={deployment} />
+    return <OddsShiftUnavailable deployment={deployment} embedded={embedded} />
   }
 
-  return <OddsShiftMarketPage deployment={deployment} marketAddr={marketAddr} />
+  return (
+    <OddsShiftMarketPage
+      deployment={deployment}
+      marketAddr={marketAddr}
+      embedded={embedded}
+    />
+  )
 }
 
 function OddsShiftMarketPage({
   deployment,
   marketAddr,
+  embedded,
 }: {
   deployment: OddsShiftDeployment
   marketAddr: Address
+  embedded: boolean
 }) {
   const { address, isConnected } = useAccount()
   // Reads and writes are pinned by route configuration instead of following the
@@ -135,7 +147,9 @@ function OddsShiftMarketPage({
   const publicClient = usePublicClient({ chainId })
   const { writeContractAsync } = useWriteContractWithAttribution()
   const { switchChain, isPending: isSwitching } = useSwitchChain()
+  const { connect, connectors, isPending: isConnecting } = useConnect()
   const explorerUrl = chain.blockExplorers?.default.url ?? getChainConfig(chainId)?.explorerUrl ?? ''
+  const primaryConnector = connectors[0]
 
   const [side, setSide] = useState<Side>('YES')
   const [amount, setAmount] = useState('30')
@@ -419,13 +433,7 @@ function OddsShiftMarketPage({
   const tradeAllowed = status === 0
   const writesBlocked = busy !== null || chainMismatch || collateralMismatch
 
-  return (
-    <div className="popamm">
-      <style>{POP_AMM_CSS}</style>
-      <style>{ODDS_SHIFT_CSS}</style>
-      <SiteNav />
-
-      <main className="pp-wrap os-wrap">
+  const body = (
         <div className="os-stack">
           <span className="os-brand">OddsShift · {deployment.routeLabel}</span>
           <h1 className="pp-hero os-hero">{question ?? 'Loading market…'}</h1>
@@ -717,7 +725,16 @@ function OddsShiftMarketPage({
                   )}
 
                   {!isConnected ? (
-                    <div className="pp-note pp-note-muted">Connect a wallet to trade.</div>
+                    <>
+                      <div className="pp-note pp-note-muted">Connect wallet to trade</div>
+                      <button
+                        className="pp-cta pp-buy-cta"
+                        onClick={() => primaryConnector && connect({ connector: primaryConnector })}
+                        disabled={!primaryConnector || isConnecting}
+                      >
+                        {isConnecting ? 'Connecting…' : 'Connect Wallet'}
+                      </button>
+                    </>
                   ) : chainMismatch ? (
                     <>
                       <div className="pp-note pp-note-warn">
@@ -826,8 +843,9 @@ function OddsShiftMarketPage({
             </div>
           </div>
         </div>
-      </main>
+  )
 
+  const toast = (
       <TxToast
         open={toastOpen}
         onClose={() => setToastOpen(false)}
@@ -840,17 +858,37 @@ function OddsShiftMarketPage({
         error={toastError}
         message={error}
       />
-    </div>
   )
-}
 
-function OddsShiftUnavailable({ deployment }: { deployment: OddsShiftDeployment }) {
+  if (embedded) {
+    return (
+      <div className="os-embedded">
+        <style>{ODDS_SHIFT_CSS}</style>
+        <div className="pp-wrap os-wrap">{body}</div>
+        {toast}
+      </div>
+    )
+  }
+
   return (
     <div className="popamm">
       <style>{POP_AMM_CSS}</style>
       <style>{ODDS_SHIFT_CSS}</style>
       <SiteNav />
-      <main className="pp-wrap">
+      <main className="pp-wrap os-wrap">{body}</main>
+      {toast}
+    </div>
+  )
+}
+
+function OddsShiftUnavailable({
+  deployment,
+  embedded = false,
+}: {
+  deployment: OddsShiftDeployment
+  embedded?: boolean
+}) {
+  const card = (
         <section className="pp-card">
           <div className="pp-market">
             <div className="pp-title">{deployment.routeLabel} market not configured</div>
@@ -860,7 +898,23 @@ function OddsShiftUnavailable({ deployment }: { deployment: OddsShiftDeployment 
             </p>
           </div>
         </section>
-      </main>
+  )
+
+  if (embedded) {
+    return (
+      <div className="os-embedded">
+        <style>{ODDS_SHIFT_CSS}</style>
+        <div className="pp-wrap">{card}</div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="popamm">
+      <style>{POP_AMM_CSS}</style>
+      <style>{ODDS_SHIFT_CSS}</style>
+      <SiteNav />
+      <main className="pp-wrap">{card}</main>
     </div>
   )
 }
