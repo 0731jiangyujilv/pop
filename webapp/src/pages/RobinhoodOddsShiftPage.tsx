@@ -4,6 +4,11 @@ import { LiveAccounting } from '@/components/oddsshift/LiveAccounting'
 import { LiveDeploymentHeader } from '@/components/oddsshift/LiveDeploymentHeader'
 import { MechanismExplainer } from '@/components/oddsshift/MechanismExplainer'
 import {
+  ContributionProtectionCard,
+  FairScenarioCard,
+  ToxicScenarioCard,
+} from '@/components/oddsshift/ScenarioCards'
+import {
   ROBINHOOD_EVENT_MARKET_V2_ADDRESS,
   resolveRobinhoodMarketAddress,
 } from '@/config/robinhood'
@@ -71,6 +76,13 @@ function RobinhoodEvidenceExperience({ marketAddr }: { marketAddr: `0x${string}`
           <LiveDeploymentHeader liveUnavailable={live.unavailable} zeroLiability={zeroLiability} />
           <MechanismExplainer />
           <LiveAccounting live={live} />
+
+          <div className="rh-scenarios">
+            <FairScenarioCard />
+            <ToxicScenarioCard />
+          </div>
+
+          <ContributionProtectionCard />
         </div>
       </main>
     </div>
