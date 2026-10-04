@@ -21,11 +21,8 @@ import { StaticLpPage } from '@/pages/StaticLpPage'
 import { EventMarketDetailPage } from '@/pages/EventMarketDetailPage'
 import { PortfolioPage } from '@/pages/PortfolioPage'
 import { ChampionPoolHistoryPage } from '@/pages/ChampionPoolHistoryPage'
-import { OddsShiftPage, type OddsShiftDeployment } from '@/pages/OddsShiftPage'
-import {
-  ROBINHOOD_USDG_ADDRESS,
-  robinhoodTestnet,
-} from '@/config/robinhood'
+import { OddsShiftPage } from '@/pages/OddsShiftPage'
+import { RobinhoodOddsShiftPage } from '@/pages/RobinhoodOddsShiftPage'
 // Other pages are parked while the app focuses on the FIFA AMM markets.
 // import { CreateBetPage } from '@/pages/CreateBetPage'
 // import { BetPage } from '@/pages/BetPage'
@@ -39,15 +36,6 @@ import {
 // import { CreateMarketPage } from '@/pages/CreateMarketPage'
 
 const queryClient = new QueryClient()
-
-const robinhoodOddsShiftDeployment: OddsShiftDeployment = {
-  chain: robinhoodTestnet,
-  defaultMarketAddress: import.meta.env.VITE_ROBINHOOD_ODDSHIFT_MARKET_ADDRESS,
-  expectedCollateralAddress: ROBINHOOD_USDG_ADDRESS,
-  expectedCollateralSymbol: 'USDG',
-  faucetEnabled: false,
-  routeLabel: 'Robinhood USDG Demo',
-}
 
 function ReferralTracker() {
   const location = useLocation()
@@ -99,14 +87,8 @@ function App() {
               {/* OddsShift demo — address comes straight from the path, no registry. */}
               <Route path="/oddsshift/:contractAddress" element={<OddsShiftPage />} />
               <Route path="/hook" element={<OddsShiftPage />} />
-              <Route
-                path="/robinhood"
-                element={<OddsShiftPage deployment={robinhoodOddsShiftDeployment} />}
-              />
-              <Route
-                path="/robinhood/:contractAddress"
-                element={<OddsShiftPage deployment={robinhoodOddsShiftDeployment} />}
-              />
+              <Route path="/robinhood" element={<RobinhoodOddsShiftPage />} />
+              <Route path="/robinhood/:contractAddress" element={<RobinhoodOddsShiftPage />} />
               <Route path="/result/:slug" element={<StaticResultPage />} />
               <Route path="/result/:slug/lp" element={<StaticLpPage />} />
             </Routes>

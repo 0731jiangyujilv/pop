@@ -16,7 +16,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const src = join(root, 'src')
 
 const ROUTE_SHELL = join(src, 'App.tsx')
-const ROBINHOOD_ROUTE_PAGE = join(src, 'pages', 'OddsShiftPage.tsx')
+const ROBINHOOD_ROUTE_PAGE = join(src, 'pages', 'RobinhoodOddsShiftPage.tsx')
 const ENTRY = join(src, 'main.tsx')
 const EXTRA = [
   'vite.config.ts',
