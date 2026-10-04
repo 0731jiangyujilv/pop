@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom'
 import { SiteNav } from '@/components/SiteNav'
+import { EngineeringEvidence, OnchainEvidenceDrawer } from '@/components/oddsshift/EvidenceExplorer'
 import { LiveAccounting } from '@/components/oddsshift/LiveAccounting'
 import { LiveDeploymentHeader } from '@/components/oddsshift/LiveDeploymentHeader'
 import { MechanismExplainer } from '@/components/oddsshift/MechanismExplainer'
@@ -83,6 +84,8 @@ function RobinhoodEvidenceExperience({ marketAddr }: { marketAddr: `0x${string}`
           </div>
 
           <ContributionProtectionCard />
+          <OnchainEvidenceDrawer />
+          <EngineeringEvidence />
         </div>
       </main>
     </div>
