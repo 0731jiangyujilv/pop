@@ -1,0 +1,33 @@
+POP / OddsShift — Final Robinhood Chain Testnet State
+
+Captured: 2026-10-04T02:11:48Z
+
+Chain ID:
+46630
+
+Contract:
+0x4F946Cca7f8da191168f76Fe12fbD6cfa1CAA26e
+
+USDG:
+0x7E955252E15c84f5768B83c41a71F9eba181802F
+
+Deployer:
+0xA5B709025224bA08B8eFfF1b0D1d28E970A34Cf3
+
+Question:
+"Will BTC close above $100k this week?"
+
+Market status:
+0
+
+Final OddsShift state:
+(30, 70, 50000 [5e4], 10000 [1e4], 5, 5, 120, 685000 [6.85e5], 0, 20, 20, 0, 4, false, 0, 0, 0, 0, 5137680000000000 [5.137e15], 229516 [2.295e5], 284252 [2.842e5], 251299 [2.512e5])
+
+Final user state:
+(0, 0, 0, 20)
+
+Final deployer USDG balance:
+24256125 [2.425e7]
+
+Final market USDG balance:
+175743875 [1.757e8]
